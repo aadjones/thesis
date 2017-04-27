@@ -5,7 +5,22 @@ In the previous chapter, we discussed the potential for subspace methods to acce
 \section{Previous Work}
 Since memory consumption is a known challenge with subspace techniques, other research has focused on reducing the memory footprint of these simulations. In the applications of sound \cite{Langlois:2014:ECM} and blendshape matrices \cite{Seo:2011:CDM}, compression techniques have been developed; however, we are unaware of analogous research in subspace fluid simulation. In the work of Wicke et al.~\cite{Wicke:2009}, a modular fluid basis is used that can be tiled throughout the domain. However, our approach is complementary, as the modular tiles themselves could be further compressed by applying our algorithm.
 
+\section{Background}
+\subsection{Data Compression Preliminaries}
+The general problem of data compression at first blush seems daunting: how do we reduce the memory footprint of a set of data without losing information? Fortunately, the sets of data that we typically work with are not random, but rather contain many patterns and redundancies. Exploiting these redundancies is the key to any successful data compression algorithm.
 
+Data compression algorithms can be divided into two distinct families: lossless and lossy. A lossless compression algorithm is able to take an input signal, compress it, and reconstruct the exact same input signal. A simple example is run-length coding. For instance, to represent 100 white pixels, followed by 200 black pixels, followed by an another 50 white pixels, we can code the sequence (`w', 100), (`b', 200), (`w', 50), rather than coding the 350 pixels individually. Decoding is straightforward and retains all information. The ZIP file format is a familiar example of widely-used lossless data compression.
 
+Lossless compression can be very powerful when applied to original data with many redundancies; however, it has strict limitations based on the mathematics of information theory. Every file, no matter how redundant, contains a certain amount of information. \todo{Add details about information theory/entropy.}
 
+Lossy compression, by contrast, may not be able to reconstruct the exact same input signal. Its applications tend to focus on perceptual data, such as images, video, and sound. Although its reconstructions are not perfectly faithful, if the technique is soundly based on the limits of human perception, the results are virtually indistinguishable. The JPEG file format for images is a widely-used lossy data compression algorithm.
 
+Data streams of images oftentimes contain more information than a human can reasonably resolve. For example, a picture might contain fine details that are indistinguishable from their smoothed counterpoints, or subtle color gradients that are indistinguishable from coarser ones. The key to most lossy data compression algorithms is finding a way of transforming the original information into a domain that captures these characteristics more naturally. These techniques are called {\em transform coding}.
+
+\subsection{Mathematical Preliminaries}
+In order to describe transform coding formally, we will require several notions from linear algebra and analysis.
+\subsubsection{Vector Spaces}
+The basic framework of most of our data manipulation can be expressed through the notion of vector spaces. We are familiar with the physical notion of vectors in two- or three-dimensional space as quantities with both a magnitude and a direction, often depicted graphically with an arrow. \todo{Add figure of a 2D vector.} For convenience, we often represent vectors using coordinates. We can view the coordinate representation as a decomposition into fundamental unit vectors pointing in the $x$ and $y$ direction. These are called the {\em basis} vectors. Any arbitrary vector can be decomposed uniquely into a combination of these basis vectors. 
+
+Vectors can be added or subtracted, producing another vector. They can also be multiplied by a scalar (i.e.,~a number in $\R$ or $\C$), yielding another vector.
+\subsection{The JPEG Coding Algorithm}
