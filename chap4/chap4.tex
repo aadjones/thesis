@@ -1,1 +1,11 @@
 \chapter[Transform-based compression of fluid subspaces]{Transform-based compression of fluid subspaces}
+
+In the previous chapter, we discussed the potential for subspace methods to accelerate the computational cost of physics-based simulations. However, a significant drawback of the subspace approach is the time/memory tradeoff: the speed increase comes at a cost of much larger memory requirements. Specifically, subspace simulations can easily consume dozens of gigabytes of memory when dealing with high-resolution scenes. In this chapter, we discuss a compression method to reduce the memory footprint of subspace methods by an order of magnitude. 
+
+\section{Previous Work}
+Since memory consumption is a known challenge with subspace techniques, other research has focused on reducing the memory footprint of these simulations. In the applications of sound \cite{Langlois:2014:ECM} and blendshape matrices \cite{Seo:2011:CDM}, compression techniques have been developed; however, we are unaware of analogous research in subspace fluid simulation. In the work of Wicke et al.~\cite{Wicke:2009}, a modular fluid basis is used that can be tiled throughout the domain. However, our approach is complementary, as the modular tiles themselves could be further compressed by applying our algorithm.
+
+
+
+
+
