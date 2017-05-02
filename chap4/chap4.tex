@@ -25,11 +25,76 @@ The basic framework of most of our data manipulation can be expressed through th
 Vectors can be added or subtracted, producing another vector. They can also be multiplied by a scalar (i.e.,~a number in $\R$ or $\C$), yielding another vector. The formalization of this idea is the mathematical concept of a {\em vector space}, which allows for a more abstract treatment of vectors. For example, an image represented on a computer as a sequence of $N$ pixel values can be regarded as a vector living in the vector space $\R^N$. This abstraction allows us to bring the tools of linear algebra to bear on a variety of seemingly different applications.
 
 \subsubsection{Inner Products}
+\label{sec:innerprod}
 Recall that an {\em inner product}, or dot product, is a binary operation $\langle \cdot, \cdot \rangle$ between two vectors that yields a scalar as an output. The most familiar example is in $\R^2$, where, given two vectors $\vv = (v_1, v_2)$ and $\ww = (w_1, w_2)$, we have $\langle \vv, \ww \rangle = v_1w_1 + v_2w_2$. Inner products add a notion of geometry to a vector space through angles and length: when an inner product between two vectors is $0$, the vectors are orthogonal; and the inner product of a vector with itself gives the square of its length. For example, the basis vectors $\ee_x = (1, 0)$ and $\ee_y = (0, 1)$ are orthogonal, and the vector $\vv = (3, 4)$ has squared length $\langle \vv, \vv \rangle = 3^2 + 4^2 = 5^2$. Inner products also are closely related to the projection of one vector onto another. For example, if we take an arbitrary vector $\vv = (v_1, v_2)$ and take its inner product with the basis vector $\ee_y = (0, 1)$, the result is the component $v_2$ in the $y$ direction. In general, given a set of unit basis vectors which are mutually orthogonal (known as an {\em orthonormal} basis), we can compute the various components of arbitrary vectors by calculating their inner products with the corresponding basis vector.
 
 Besides the familiar inner product in $\R^2$, more general inner products exist in other vector spaces. The canonical inner product in $\C^n$ is given by $\langle \vv, \ww \rangle = \displaystyle \sum_{k=1}^{n}v_k\overline{w_k}$, where the overbar denotes the complex conjugate. The conjugate may seem strange, but is necessary to preserve the notion that taking an inner product of a vector with itself should give the squared length of the vector. The canonical inner product in the function space $L_2([-\pi, \pi])$, the space of functions on the interval $[-\pi, \pi]$ with finite energy, is given by $\langle f, g \rangle  = \displaystyle \int_{-\pi}^{\pi}f(x)\overline{g(x)}dx$.
 
 \subsubsection{The Discrete Fourier Transform}
+The {\em Discrete Fourier Transform}, or DFT, is a transformation that maps one vector in $\C^{N}$ to another vector $\C^{N}$. Given a vector $\xx = \left(x_0, x_1, \dots, x_{N-1}\right)$, the DFT maps $\xx$ to the output $\XX = \left(X_0, X_1, \dots, X_{N-1}\right)$, where
 
+\begin{equation}
+\label{eq:dft}
+	X_k = \sum_{n=0}^{N-1}x_n e^{-i2\pi n k/N}, \ \ k = 0, 1, \dots, N-1
+\end{equation}
+
+This definition, as written, appears somewhat unmotivated, so we give a brief geometrical interpretation of the DFT in terms of inner products and roots of unity. 
+To begin, we write $\omega = e^{i2 \pi / N}$ as the first $N$-th root of unity\footnote{That is, $\omega$ satisfies $\omega^N = 1$.}. Then the $N$ powers of $\omega$ comprise the entire set of $N$-th roots of unity: $\omega^0, \omega^1, \omega^2, \dots, \omega^{N-1}$. If we collect these into a single vector $\boldomega$, we have 
+
+\begin{equation}
+	\boldomega = \left(1, \omega^1, \omega^2, \dots, \omega^{N-1}\right) \in \C^N. 
+\end{equation}
+
+We can also consider the $N$ powers of $\boldomega$:
+\begin{equation}
+	\boldomega^k = \left(1, \omega^k, \omega^{2k}, \dots, \omega^{(N-1)k}\right), \ \ k = 0, 1, \dots, N-1
+\end{equation}
+The collection of $N$ vectors $\{\boldomega^0, \boldomega^1, \dots, \boldomega^{N-1}\}$ forms an orthogonal\footnote{Orthogonal, but not orthonormal, since each basis vector has magnitude $\sqrt{N} \neq 1$.} basis for $\C^N$, which we shall call the Fourier basis. As such, given an arbitrary vector $\xx = \left(x_0, x_1, \dots, x_{N-1}\right)$, we can compute its representation in the Fourier basis by projecting $\xx$ against each of the new basis functions using the complex inner product. More concretely, the new representation $\XX = \left(X_0, X_1, \dots, X_{N-1}\right)$ in the Fourier basis is given by 
+
+\begin{equation}
+	X_k = \frac{1}{\sqrt{N}} \langle \xx, \boldomega^k \rangle, \ \ k = 0, 1, \dots, N-1
+\end{equation}
+Recalling the definition of the complex inner product given in~\ref{sec:innerprod}, this can be expand to agree with the original definition~\ref{eq:dft} up to a constant factor:
+
+\begin{align}
+	X_k &= \frac{1}{\sqrt{N}}\sum_{n=0}^{N-1}x_n \overline{\omega^{nk}}\\
+	        &= \frac{1}{\sqrt{N}}\sum_{n=0}^{N-1}x_n \overline{\left(e^{i 2 \pi / N}\right)^{nk}}\\
+	        &= \frac{1}{\sqrt{N}}\sum_{n=0}^{N-1}x_n e^{-i2\pi n k/N}, \ \ k = 0, 1, \dots, N-1
+\end{align}
+
+This interpretation of projecting against the Fourier basis will prove more useful than the explicit formula for having an intuition about what the DFT is doing under the hood.
+In fact, using this interpretation, we can even write the DFT as the following $N \times N$ change-of-basis matrix $\mathcal{F}$, with each of the $N$ columns given by the corresponding $\boldomega^k$ vector:
+
+\begin{align}
+	\mathcal{F} &= \begin{pmatrix}
+    		\vertbar & \ \  \vertbar & \ \ \ \ \ \ \ \ \  \vertbar & & \vertbar \\
+    		\boldomega^0  & \ \   \boldomega^1  & \ \ \ \ \ \ \ \ \  \boldomega^2 & \ \ \ \ \ \dots & \ \ \ \ \ \ \boldomega^{N-1} \\
+ 		\vertbar & \ \  \vertbar & \ \ \ \ \ \ \ \ \  \vertbar & & \vertbar 
+  	\end{pmatrix} \\	
+	&= \begin{pmatrix}
+	1 & 1 & 1 & \dots & 1 \\
+	1 & \omega^{-1} & \omega^{-2} & \dots & \omega^{-(N-1)} \\
+	1 & \omega^{-2} & \omega^{-4} & \dots & \omega^{-2(N-1)} \\
+	\vdots & \vdots & \vdots & \ddots & \vdots \\
+	1 & \omega^{-(N-1)} & \omega^{-2(N-1)} & \dots & \omega^{-{(N-1)}^2}
+	\end{pmatrix}	
+\end{align}
+
+Thus, the DFT of a vector $\xx \in \C^N$ can now simply be defined by the matrix-vector multiplication $\mathcal{F} \xx = \XX$.
 
 \subsection{The JPEG Coding Algorithm}
+The JPEG coding scheme is a form of lossy, transform compression for digital images. Because our subspace fluid compression scheme is based on many of the techniques used in JPEG, we shall explore the implementation of JPEG in some detail to better motivate our own coding algorithm. 
+
+The point of departure in JPEG is a digital image file, which comprises a two-dimensional array of pixel values. (For simplicity, we will assume a grayscale image.) The basic redundancy that JPEG exploits is that for most images, the majority of the `energy' is packed into lower spatial frequencies. In other words, generally speaking, there are not many extremely sharp changes between hues in a typical image. (Notable exceptions include medical imaging, for which JPEG is typically not applied.) 
+
+
+
+
+
+
+
+
+
+
+
+
