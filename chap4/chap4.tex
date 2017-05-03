@@ -82,11 +82,27 @@ In fact, using this interpretation, we can even write the DFT as the following $
 
 Thus, the DFT of a vector $\xx \in \C^N$ can now simply be defined by the matrix-vector multiplication $\mathcal{F} \xx = \XX$.
 
+The multidimensional DFT applies takes multidimensional arrays of inputs rather than vectors. For example, the two-dimensional DFT of the array $\xx \in \C^{M \times N}$ is given by
+the array $\XX \in \C^{M \times N}$ whose entries are
+\begin{equation}
+	\XX_{u,v} = \sum_{m=0}^{M-1} \sum_{n=0}^{N-1} \xx_{m, n} e^{-i 2 \pi \left(um + vn\right)}
+\end{equation}
+
+In the most general case, given a $d$-dimensional array $\xx \in C^{N_1 \times N_2 \times \cdots \times N_d}$, its d-dimensional DFT is given by the array $\XX \in \C^{N_1 \times N_2 \times \cdots \times N_d}$ whose entries are
+\begin{equation}
+	\XX_{u_1, u_2, \dots, u_d} = \sum_{n_1=0}^{N_1-1} \sum_{n_2=0}^{N_2-1} \cdots \sum_{n_d = 0}^{N_d -1} \xx_{n_1, n_2, \dots, n_d} e^{-i 2 \pi \left(u_1 n_1 + u_2 n_2 + \cdots + u_d n_d\right)}
+\end{equation}
+In practice, however, we will stick to using $d=2$ or $d=3$.
 \subsection{The JPEG Coding Algorithm}
 The JPEG coding scheme is a form of lossy, transform compression for digital images. Because our subspace fluid compression scheme is based on many of the techniques used in JPEG, we shall explore the implementation of JPEG in some detail to better motivate our own coding algorithm. 
 
 The point of departure in JPEG is a digital image file, which comprises a two-dimensional array of pixel values. (For simplicity, we will assume a grayscale image.) The basic redundancy that JPEG exploits is that for most images, the majority of the `energy' is packed into lower spatial frequencies. In other words, generally speaking, there are not many extremely sharp changes between hues in a typical image. (Notable exceptions include medical imaging, for which JPEG is typically not applied.) 
 
+So, to begin, suppose we have a two-dimensional grayscale image of resolution $800 \times 800$. While over the space of the entire image, there may be sharp changes between hues, if we subdivide the image into smaller regions, within each individual region, there are sharp changes much more rarely. Hence, the first step of JPEG is to subdivide the image into many smaller regions. The typical `sweet spot' chosen is $8 \times 8$ blocks, so in this case, there will be $100 \cdot 100 = 10 000$ such blocks. 
+
+To exploit the redundancy of the image in the frequency domain, we now transform each block according to a two-dimensional discrete cosine transform (2D-DCT). The discrete cosine transform, with some massaging, can actually be regarded as a particular case of the discrete Fourier transform, so conceptually, we can regard it in the same spirit. The multidimensional version is simply a separable product of the 1D transforms, and can be computed by first taking the 1D transform across each column and then across each row (the order is irrelevant).
+
+Next, we {\em dampen} the frequencies by point-wise dividing the resulting set of values by a pre-determined damping array, $\QQ$. The goal of this procedure is to dampen enough of the frequencies to values small enough that, upon integer rounding, they become zero. When we scan through the values and flatten them into a 1D vector, each long string of zeroes can be efficiently compressed by run-length coding.
 
 
 
