@@ -98,13 +98,56 @@ The JPEG coding scheme is a form of lossy, transform compression for digital ima
 
 The point of departure in JPEG is a digital image file, which comprises a two-dimensional array of pixel values. (For simplicity, we will assume a grayscale image.) The basic redundancy that JPEG exploits is that for most images, the majority of the `energy' is packed into lower spatial frequencies. In other words, generally speaking, there are not many extremely sharp changes between hues in a typical image. (Notable exceptions include medical imaging, for which JPEG is typically not applied.) 
 
-So, to begin, suppose we have a two-dimensional grayscale image of resolution $800 \times 800$. While over the space of the entire image, there may be sharp changes between hues, if we subdivide the image into smaller regions, within each individual region, there are sharp changes much more rarely. Hence, the first step of JPEG is to subdivide the image into many smaller regions. The typical `sweet spot' chosen is $8 \times 8$ blocks, so in this case, there will be $100 \cdot 100 = 10 000$ such blocks. 
+So, to begin, suppose we have a two-dimensional grayscale image of resolution $800 \times 800$, as in Figure \ref{fig:charles}. While over the space of the entire image, there may be sharp changes between hues, if we subdivide the image into smaller regions, within each individual region, there are sharp changes much more rarely. Hence, the first step of JPEG is to subdivide the image into many smaller regions. The typical `sweet spot' chosen is $8 \times 8$ blocks, so in this case, there will be $100 \cdot 100 = 10 000$ such blocks. Figure  \ref{fig:charles} shows one such block in the center of the whole image. The grayscale values (as unsigned $8$-bit integers between $0$ and $255$) for this block $\BB$ are as follows:
 
-To exploit the redundancy of the image in the frequency domain, we now transform each block according to a two-dimensional discrete cosine transform (2D-DCT). The discrete cosine transform, with some massaging, can actually be regarded as a particular case of the discrete Fourier transform, so conceptually, we can regard it in the same spirit. The multidimensional version is simply a separable product of the 1D transforms, and can be computed by first taking the 1D transform across each column and then across each row (the order is irrelevant).
-
-Next, we {\em dampen} the frequencies by point-wise dividing the resulting set of values by a pre-determined damping array, $\QQ$. The goal of this procedure is to dampen enough of the frequencies to values small enough that, upon integer rounding, they become zero. When we scan through the values and flatten them into a 1D vector, each long string of zeroes can be efficiently compressed by run-length coding.
+\begin{figure}
+\label{fig:charles}
+	\includegraphics[width=0.5\textwidth]{chap4/figures/charles_gray.png}
+	\includegraphics[width=0.5\textwidth]{chap4/figures/charles_block.png}
+	\caption{{\em{\bf Left:} The original $800 \times 800$ image.} {\em{\bf Right:} An $8 \times 8$ sub-block zoomed in.}}
+\end{figure}
 
 \begin{equation}
+\label{eq:subblock}
+	\BB = \begin{pmatrix}
+	56 & 42 &	46 &	43 &	46 & 48 &	43 &	48\\
+	45 &	47 &	59 & 	47 &	57 &	50 &	50 &	65\\
+	48 &	59 &	37 &	41 &	45 &	52 &	67 &	74\\
+	51 &	39 &	47 &	50 &	55 &	70 &	54 &	36\\
+	39 &	66 &	59 &	72 &	88 &	49 &	26 &	20\\
+	66 &	69 &	76 &	75 &	50 &	24 &	25 &	25\\
+	70 &	78 &	79 &	38 &	20 &	23 &	22 &	20\\
+	75 &	56 &	27 &	23 &	23 &	23 &	26 &	56
+	\end{pmatrix}
+\end{equation}
+
+To exploit the redundancy of the image in the frequency domain, we now transform each block according to a two-dimensional discrete cosine transform (2D-DCT). The discrete cosine transform, with some massaging, can actually be regarded as a particular case of the discrete Fourier transform, so conceptually, we can regard it in the same spirit. The resulting data transforms $\BB$ into $\textnormal{DCT} = \widehat{\BB}$ as follows:
+
+\begin{equation}
+\label{eq:dct2}
+	\widehat{\BB} = \begin{pmatrix}
+	388.13 & 48.51 & 3.43 & -5.62 & 3.63 & -10.51 & 1.42 & 2.12\\
+	21.90 &	-65.26	 & -10.63 &	10.88 &	-0.39 &	1.66 & 	2.68	& 2.75\\
+	-27.13	 & 5.92 &	53.83 & -8.29 &	 5.35 &	1.02	& 11.21	& 0.80 \\
+	6.26	& 45.24 &	-45.46 & -13.37 &	1.97 &	3.12 &	0.07	& 6.32 \\
+	-12.63 &	-15.30	 & -11.94 &	28.36 &	11.38 &	-4.048 	& 1.56	& -3.43\\
+	-8.00	 & 9.89 & 14.93	& 5.72 &	-20.23	 & 16.34	& 9.22 &	-2.35\\
+	0.82	& -8.88 &	17.96 &	-0.44	& 13.89	& 4.13	 & -10.33	& -7.66\\
+	0.16	& 3.34	& -1.24 & 	-2.58 & 	-5.01	 & -15.33  &	-11.65 &	-0.71	
+	\end{pmatrix}
+\end{equation}
+
+\begin{figure}
+\label{fig:jpeg8}
+	\centering
+	\includegraphics[width=0.5\textwidth]{chap4/figures/jpeg8.png}
+	\caption{\em The $64$ $2$D DCT basis vectors for an $8\times8$ domain. Any $8\times8$ image can be expressed as a linear combination of these vectors. For example, the $8\times8$ array in \ref{eq:dct2} gives the corresponding weights that would generate the original sub-block $\BB$ in \ref{eq:subblock}.}
+\end{figure}
+
+Next, we {\em dampen} the frequencies by point-wise dividing the resulting set of values by a pre-determined damping array, $\QQ$, given by Equation \ref{eq:q50}. The goal of this procedure is to dampen enough of the frequencies to values small enough that, upon integer rounding, they become zero. 
+
+\begin{equation}
+\label{eq:q50}
 	\QQ = \begin{pmatrix}
 	16 & 11 & 10 & 16 & 24 & 40 & 51 & 61\\
 	12 & 12 & 14 & 19 & 26 & 58 & 60 & 55\\
@@ -114,6 +157,19 @@ Next, we {\em dampen} the frequencies by point-wise dividing the resulting set o
 	24 & 35 & 55 & 64 & 81 & 104 & 113 & 92\\
 	49 & 64 & 78 & 87 & 103 & 121 & 120 & 101\\
 	72 & 92 & 95 & 98 & 112 & 100 & 103 & 99	
+	\end{pmatrix}
+\end{equation}
+
+\begin{equation}
+	\textnormal{Round}\left(\frac{\widehat{\BB}}{\QQ}\right) = \begin{pmatrix}
+	24 &	4 &	0 &	0 &	0 &	0 &	0 &	0\\
+	2 &	-5 &	-1 &	1 &	0 &	0 &	0 &	0\\
+	-2 &	0 &	3 &	0 &	0 &	0 &	0 &	0\\
+	0 &	3 &	-2 &	0 &	0 &	0 &	0 &	0\\
+	-1 &	-1 &	0 &	1 &	0 &	0 &	0 &	0\\
+	0 &	0 &	0 &	0 &	0 &	0 &	0 &	0\\
+	0 &	0 &	0 &	0 &	0 &	0 &	0 &	0\\
+	0 &	0 &	0 &	0 &	0 &	0 &	0 &	0
 	\end{pmatrix}
 \end{equation}
 
