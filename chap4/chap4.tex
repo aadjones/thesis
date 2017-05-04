@@ -141,11 +141,10 @@ To exploit the redundancy of the image in the frequency domain, we now transform
 \label{fig:jpeg8}
 	\centering
 	\includegraphics[width=0.5\textwidth]{chap4/figures/jpeg8.png}
-	\caption{\em The $64$ $2$D DCT basis vectors for an $8\times8$ domain. Any $8\times8$ image can be expressed as a linear combination of these vectors. For example, the $8\times8$ array in \ref{eq:dct2} gives the corresponding weights that would generate the original sub-block $\BB$ in \ref{eq:subblock}.}
+	\caption{\em The $64$ 2D DCT basis vectors for an $8\times8$ domain. Any $8\times8$ image can be expressed as a linear combination of these vectors. For example, the $8\times8$ array in \ref{eq:dct2} gives the corresponding weights that would generate the original sub-block $\BB$ in \ref{eq:subblock}.}
 \end{figure}
 
-Next, we {\em dampen} the frequencies by point-wise dividing the resulting set of values by a pre-determined damping array, $\QQ$, given by Equation \ref{eq:q50}. The goal of this procedure is to dampen enough of the frequencies to values small enough that, upon integer rounding, they become zero. 
-
+Next, we {\em dampen} the frequencies by point-wise dividing the resulting set of values by a pre-determined damping array, $\QQ$, given by Equation \ref{eq:q50}. 
 \begin{equation}
 \label{eq:q50}
 	\QQ = \begin{pmatrix}
@@ -158,9 +157,13 @@ Next, we {\em dampen} the frequencies by point-wise dividing the resulting set o
 	49 & 64 & 78 & 87 & 103 & 121 & 120 & 101\\
 	72 & 92 & 95 & 98 & 112 & 100 & 103 & 99	
 	\end{pmatrix}
+	
 \end{equation}
 
+The goal of this procedure is to dampen enough of the frequencies to values small enough that, upon integer rounding, they become zero. This allows for compression gains, albeit at the cost of information loss. Equation \ref{eq:round} shows the result.
+
 \begin{equation}
+\label{eq:round}
 	\textnormal{Round}\left(\frac{\widehat{\BB}}{\QQ}\right) = \begin{pmatrix}
 	24 &	4 &	0 &	0 &	0 &	0 &	0 &	0\\
 	2 &	-5 &	-1 &	1 &	0 &	0 &	0 &	0\\
@@ -173,6 +176,26 @@ Next, we {\em dampen} the frequencies by point-wise dividing the resulting set o
 	\end{pmatrix}
 \end{equation}
 
+Note how many of the entires have been dampened to zero, as desired. Next, we scan through this array in a zigzag fashion, as demonstrated by Figure \ref{fig:zigzag}.
+
+\begin{figure}
+\label{fig:zigzag}
+	\centering
+	\includegraphics[width=0.5\textwidth]{chap4/figures/zigzag.png}
+	\caption{\em The zigzag scan from northwest to southeast corner. The goal is to catch long consecutive strings of zeroes.}
+\end{figure}
+
+This allows us to catch long strings of zeroes. In this case, the final $31$ entries are all zeroes, so run-length coding will prove to be highly profitable. Although the full JPEG standard includes several additional wrinkles, these are beyond the scope of the current discussion.
+
+The decoding procedure is a straightforward reversal of each of the coding steps: for each block, we first decode the run-length code, we unzigzag the data into the correct shape, we undampen it by multiplying by $\QQ$, and finally, we compute the inverse two-dimensional discrete cosine transform (inverse 2D DCT). Figure \ref{fig:blockrecon} shows the JPEG-decoded block side-by-side with its original counterpart. The overall average error in this block comes out to approximately $7$ values per pixel (on a $256$-value grayscale).
+
+\begin{figure}
+\label{fig:blockrecon}
+	\centering
+	\includegraphics[scale=25]{chap4/figures/charles_block.png}
+	\includegraphics[scale=25]{chap4/figures/charles_block_reconstructed.png}
+	\caption{{\em{\bf Left:} The original, uncompressed $8\times8$ data block.} {\em{\bf Right:} The same $8 \times 8$ block after undergoing JPEG compression at quality $50$ percent. Observe the general smoothing, which is an artifact of the information lost during the dampening and rounding stage.}}
+\end{figure}
 
 \section{A Subspace Compression Scheme}
 \label{sec:Algorithm}
