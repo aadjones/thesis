@@ -1,18 +1,61 @@
-\thispagestyle{empty}
-\begin{center}
-  UNIVERSITY OF CALIFORNIA\\
-  Santa Barbara\\
-  \vfil
-  {\Large\thetitle}\\
-  \vfil
-  by\\
-  \vfil
-  {\large Aaron Demby Jones}\\
-  \vfil
-  Committee in charge:\\
-  Professor Theodore Kim, Chair\\
-  Professor JoAnn Kuchera-Morin\\
-  Professor Clarence Barlow\\
-  \vfil
-  June 2017
-\end{center}
+ % Set the font that will be used in the front matter headings
+\def\fmfont{\fontsize\@xiipt{14.5}\selectfont}
+\def\fmsmallfont{\fontsize\@xiipt{14pt}\selectfont}
+
+\def\@normalsize{\normalsize}
+\def\ssp{\def\baselinestretch{\sspval}\@normalsize}
+\def\setssp#1{\def\sspval{#1}}
+\setssp{1.0}
+
+\def\dsp{\def\baselinestretch{\dspval}\@normalsize}
+\def\setdsp#1{\def\dspval{#1}}
+%\setdsp{1.37}
+\setdsp{2}
+
+\def\ddsp{\def\baselinestretch{\ddspval}\@normalsize}
+\def\setddsp#1{\def\ddspval{#1}}
+\setddsp{1.6}
+
+% TITLEPAGE
+%
+  \thispagestyle{empty}
+  \begin{center}
+    {\large
+     UNIVERSITY OF CALIFORNIA \par
+     Santa Barbara \par \bigskip\bigskip\bigskip
+     \vfill
+     {\LARGE Seeing and Hearing Fluid Subspaces \par}
+     \bigskip\bigskip\bigskip
+     A dissertation submitted in partial satisfaction \par
+     of the requirements for the degree \par
+     \bigskip\bigskip
+     {Doctor of Philosophy} \par
+     \bigskip
+     in\par
+     \bigskip
+     {Media Arts and Technology} \par \bigskip
+     by \par \bigskip
+     {Aaron Demby Jones} \par
+    }
+    %  \end{center}          %%%%%%%%%%%%  
+\vfill
+  Committee in Charge: \par
+  \bigskip
+  \vbox{
+    \begin{center}
+    \ddsp
+    \noindent
+%    \leftskip 40truept
+    Professor Theodore Kim, Chair \par
+    Professor JoAnn Kuchera-Morin \par
+    Professor Clarence Barlow \\
+    \end{center}
+  }
+  \vskip 30pt  
+%  \begin{center}                 %%%%%%%%%%%%%%
+    June~2017
+  \end{center}
+  
+
+
+
