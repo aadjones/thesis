@@ -24,8 +24,7 @@ The basic framework of most of our data manipulation can be expressed through th
 
 Vectors can be added or subtracted, producing another vector. They can also be multiplied by a scalar (i.e.,~a number in $\R$ or $\C$), yielding another vector. The formalization of this idea is the mathematical concept of a {\em vector space}, which allows for a more abstract treatment of vectors. For example, an image represented on a computer as a sequence of $N$ pixel values can be regarded as a vector living in the vector space $\R^N$. This abstraction allows us to bring the tools of linear algebra to bear on a variety of seemingly different applications.
 
-\subsubsection{Inner Products}
-\label{sec:innerprod}
+\subsubsection{Inner Products} \label{sec:innerprod}
 Recall that an {\em inner product}, or dot product, is a binary operation $\langle \cdot, \cdot \rangle$ between two vectors that yields a scalar as an output. The most familiar example is in $\R^2$, where, given two vectors $\vv = (v_1, v_2)$ and $\ww = (w_1, w_2)$, we have $\langle \vv, \ww \rangle = v_1w_1 + v_2w_2$. Inner products add a notion of geometry to a vector space through angles and length: when an inner product between two vectors is $0$, the vectors are orthogonal; and the inner product of a vector with itself gives the square of its length. For example, the basis vectors $\ee_x = (1, 0)$ and $\ee_y = (0, 1)$ are orthogonal, and the vector $\vv = (3, 4)$ has squared length $\langle \vv, \vv \rangle = 3^2 + 4^2 = 5^2$. Inner products also are closely related to the projection of one vector onto another. For example, if we take an arbitrary vector $\vv = (v_1, v_2)$ and take its inner product with the basis vector $\ee_y = (0, 1)$, the result is the component $v_2$ in the $y$ direction. In general, given a set of unit basis vectors which are mutually orthogonal (known as an {\em orthonormal} basis), we can compute the various components of arbitrary vectors by calculating their inner products with the corresponding basis vector.
 
 Besides the familiar inner product in $\R^2$, more general inner products exist in other vector spaces. The canonical inner product in $\C^n$ is given by $\langle \vv, \ww \rangle = \displaystyle \sum_{k=1}^{n}v_k\overline{w_k}$, where the overbar denotes the complex conjugate. The conjugate may seem strange, but is necessary to preserve the notion that taking an inner product of a vector with itself should give the squared length of the vector. The canonical inner product in the function space $L_2([-\pi, \pi])$, the space of functions on the interval $[-\pi, \pi]$ with finite energy, is given by $\langle f, g \rangle  = \displaystyle \int_{-\pi}^{\pi}f(x)\overline{g(x)}dx$.
@@ -34,8 +33,8 @@ Besides the familiar inner product in $\R^2$, more general inner products exist 
 The {\em Discrete Fourier Transform}, or DFT, is a transformation that maps one vector in $\C^{N}$ to another vector $\C^{N}$. Given a vector $\xx = \left(x_0, x_1, \dots, x_{N-1}\right)$, the DFT maps $\xx$ to the output $\XX = \left(X_0, X_1, \dots, X_{N-1}\right)$, where
 
 \begin{equation}
-\label{eq:dft}
 	X_k = \sum_{n=0}^{N-1}x_n e^{-i2\pi n k/N}, \ \ k = 0, 1, \dots, N-1
+\label{eq:dft}
 \end{equation}
 
 This definition, as written, appears somewhat unmotivated, so we give a brief geometrical interpretation of the DFT in terms of inner products and roots of unity. 
@@ -54,7 +53,7 @@ The collection of $N$ vectors $\{\boldomega^0, \boldomega^1, \dots, \boldomega^{
 \begin{equation}
 	X_k = \frac{1}{\sqrt{N}} \langle \xx, \boldomega^k \rangle, \ \ k = 0, 1, \dots, N-1
 \end{equation}
-Recalling the definition of the complex inner product given in~\ref{sec:innerprod}, this can be expand to agree with the original definition~\ref{eq:dft} up to a constant factor:
+Recalling the definition of the complex inner product given in \S\ref{sec:innerprod}, this can be expand to agree with the original definition~\ref{eq:dft} up to a constant factor:
 
 \begin{align}
 	X_k &= \frac{1}{\sqrt{N}}\sum_{n=0}^{N-1}x_n \overline{\omega^{nk}}\\
@@ -93,22 +92,21 @@ In the most general case, given a $d$-dimensional array $\xx \in C^{N_1 \times N
 	\XX_{u_1, u_2, \dots, u_d} = \sum_{n_1=0}^{N_1-1} \sum_{n_2=0}^{N_2-1} \cdots \sum_{n_d = 0}^{N_d -1} \xx_{n_1, n_2, \dots, n_d} e^{-i 2 \pi \left(u_1 n_1 + u_2 n_2 + \cdots + u_d n_d\right)}
 \end{equation}
 In practice, however, we will stick to using $d=2$ or $d=3$.
-\subsection{The JPEG Coding Algorithm}
+\subsection{The JPEG Coding Algorithm} \label{sec:jpeg}
 The JPEG coding scheme is a form of lossy, transform compression for digital images. Because our subspace fluid compression scheme is based on many of the techniques used in JPEG, we shall explore the implementation of JPEG in some detail to better motivate our own coding algorithm. 
 
 The point of departure in JPEG is a digital image file, which comprises a two-dimensional array of pixel values. (For simplicity, we will assume a grayscale image.) The basic redundancy that JPEG exploits is that for most images, the majority of the `energy' is packed into lower spatial frequencies. In other words, generally speaking, there are not many extremely sharp changes between hues in a typical image. (Notable exceptions include medical imaging, for which JPEG is typically not applied.) 
 
-So, to begin, suppose we have a two-dimensional grayscale image of resolution $800 \times 800$, as in Figure \ref{fig:charles}. While over the space of the entire image, there may be sharp changes between hues, if we subdivide the image into smaller regions, within each individual region, there are sharp changes much more rarely. Hence, the first step of JPEG is to subdivide the image into many smaller regions. The typical `sweet spot' chosen is $8 \times 8$ blocks, so in this case, there will be $100 \cdot 100 = 10 000$ such blocks. Figure  \ref{fig:charles} shows one such block in the center of the whole image. The grayscale values (as unsigned $8$-bit integers between $0$ and $255$) for this block $\BB$ are as follows:
+So, to begin, suppose we have a two-dimensional grayscale image of resolution $800 \times 800$, as in Figure \ref{fig:charles}. While over the space of the entire image, there may be sharp changes between hues, if we subdivide the image into smaller regions, within each individual region, there are sharp changes much more rarely. Hence, the first step of JPEG is to subdivide the image into many smaller regions. The typical `sweet spot' chosen is $8 \times 8$ blocks, so in this case, there will be $100 \cdot 100 = 10000$ such blocks. Figure  \ref{fig:charles} shows one such block in the center of the whole image. The grayscale values (as unsigned $8$-bit integers between $0$ and $255$) for this block $\BB$ are as follows:
 
 \begin{figure}
-\label{fig:charles}
 	\includegraphics[width=0.5\textwidth]{chap4/figures/charles_gray.png}
 	\includegraphics[width=0.5\textwidth]{chap4/figures/charles_block.png}
 	\caption{{\em{\bf Left:} The original $800 \times 800$ image.} {\em{\bf Right:} An $8 \times 8$ sub-block zoomed in.}}
+	\label{fig:charles}
 \end{figure}
 
 \begin{equation}
-\label{eq:subblock}
 	\BB = \begin{pmatrix}
 	56 & 42 &	46 &	43 &	46 & 48 &	43 &	48\\
 	45 &	47 &	59 & 	47 &	57 &	50 &	50 &	65\\
@@ -119,34 +117,35 @@ So, to begin, suppose we have a two-dimensional grayscale image of resolution $8
 	70 &	78 &	79 &	38 &	20 &	23 &	22 &	20\\
 	75 &	56 &	27 &	23 &	23 &	23 &	26 &	56
 	\end{pmatrix}
+	
+\label{eq:subblock}
 \end{equation}
 
-To exploit the redundancy of the image in the frequency domain, we now transform each block according to a two-dimensional discrete cosine transform (2D-DCT). The discrete cosine transform, with some massaging, can actually be regarded as a particular case of the discrete Fourier transform, so conceptually, we can regard it in the same spirit. The resulting data transforms $\BB$ into $\textnormal{DCT} = \widehat{\BB}$ as follows:
+To exploit the redundancy of the image in the frequency domain, we now transform each block according to a two-dimensional discrete cosine transform (2D-DCT). The discrete cosine transform, with some massaging, can actually be regarded as a particular case of the discrete Fourier transform, so conceptually, we can regard it in the same spirit. The resulting data transforms $\BB$ into $\textnormal{DCT}\left(\BB\right) = \widehat{\BB}$ as follows:
 
 \begin{equation}
-\label{eq:dct2}
 	\widehat{\BB} = \begin{pmatrix}
-	388.13 & 48.51 & 3.43 & -5.62 & 3.63 & -10.51 & 1.42 & 2.12\\
-	21.90 &	-65.26	 & -10.63 &	10.88 &	-0.39 &	1.66 & 	2.68	& 2.75\\
-	-27.13	 & 5.92 &	53.83 & -8.29 &	 5.35 &	1.02	& 11.21	& 0.80 \\
-	6.26	& 45.24 &	-45.46 & -13.37 &	1.97 &	3.12 &	0.07	& 6.32 \\
-	-12.63 &	-15.30	 & -11.94 &	28.36 &	11.38 &	-4.048 	& 1.56	& -3.43\\
-	-8.00	 & 9.89 & 14.93	& 5.72 &	-20.23	 & 16.34	& 9.22 &	-2.35\\
-	0.82	& -8.88 &	17.96 &	-0.44	& 13.89	& 4.13	 & -10.33	& -7.66\\
-	0.16	& 3.34	& -1.24 & 	-2.58 & 	-5.01	 & -15.33  &	-11.65 &	-0.71	
+	388.13   &   48.51   &   3.43   &   -5.62   &   3.63   &   -10.51   &   1.42   &   2.12\\
+	21.90     &	 -65.26   & -10.63  &  10.88   &   -0.39  &	1.66     & 	2.68	  &   2.75\\
+	-27.13    &   5.92     &   53.83 &   -8.29   &	 5.35   &	1.02	    & 11.21   &   0.80\\
+	6.26	      &   45.24   & -45.46  & -13.37  &	 1.97   &	3.12     &	0.07    &   6.32\\
+	-12.63    &	-15.30    & -11.94  &	28.36   &	11.38  &	-4.05    & 1.56	   &  -3.43\\
+	-8.00	      &   9.89     &   14.93  &  5.72     &	-20.23 &   16.34   &  9.22     &   -2.35\\
+	0.82	      &   -8.88    &   17.96  &	-0.44    &  13.89   &    4.13	    & -10.33   & -7.66\\
+	0.16	      &   3.34     &   -1.24   & 	-2.58    & 	-5.01	   &   -15.33  & -11.65   &  -0.71	
 	\end{pmatrix}
+\label{eq:dct2}
 \end{equation}
 
 \begin{figure}
 \label{fig:jpeg8}
 	\centering
 	\includegraphics[width=0.5\textwidth]{chap4/figures/jpeg8.png}
-	\caption{\em The $64$ 2D DCT basis vectors for an $8\times8$ domain. Any $8\times8$ image can be expressed as a linear combination of these vectors. For example, the $8\times8$ array in \ref{eq:dct2} gives the corresponding weights that would generate the original sub-block $\BB$ in \ref{eq:subblock}.}
+	\caption{\em The $64$ 2D-DCT basis vectors for an $8 \times 8$ domain. Any $8 \times 8$ image can be expressed as a linear combination of these vectors. For example, the $8 \times 8$ array in \ref{eq:dct2} gives the corresponding weights that would generate the original sub-block $\BB$ in \ref{eq:subblock}.}
 \end{figure}
 
 Next, we {\em dampen} the frequencies by point-wise dividing the resulting set of values by a pre-determined damping array, $\QQ$, given by Equation \ref{eq:q50}. 
 \begin{equation}
-\label{eq:q50}
 	\QQ = \begin{pmatrix}
 	16 & 11 & 10 & 16 & 24 & 40 & 51 & 61\\
 	12 & 12 & 14 & 19 & 26 & 58 & 60 & 55\\
@@ -157,13 +156,12 @@ Next, we {\em dampen} the frequencies by point-wise dividing the resulting set o
 	49 & 64 & 78 & 87 & 103 & 121 & 120 & 101\\
 	72 & 92 & 95 & 98 & 112 & 100 & 103 & 99	
 	\end{pmatrix}
-	
+\label{eq:q50}	
 \end{equation}
 
 The goal of this procedure is to dampen enough of the frequencies to values small enough that, upon integer rounding, they become zero. This allows for compression gains, albeit at the cost of information loss. Equation \ref{eq:round} shows the result.
 
 \begin{equation}
-\label{eq:round}
 	\textnormal{Round}\left(\frac{\widehat{\BB}}{\QQ}\right) = \begin{pmatrix}
 	24 &	4 &	0 &	0 &	0 &	0 &	0 &	0\\
 	2 &	-5 &	-1 &	1 &	0 &	0 &	0 &	0\\
@@ -174,27 +172,39 @@ The goal of this procedure is to dampen enough of the frequencies to values smal
 	0 &	0 &	0 &	0 &	0 &	0 &	0 &	0\\
 	0 &	0 &	0 &	0 &	0 &	0 &	0 &	0
 	\end{pmatrix}
+\label{eq:round}
 \end{equation}
 
 Note how many of the entires have been dampened to zero, as desired. Next, we scan through this array in a zigzag fashion, as demonstrated by Figure \ref{fig:zigzag}.
 
 \begin{figure}
-\label{fig:zigzag}
 	\centering
 	\includegraphics[width=0.5\textwidth]{chap4/figures/zigzag.png}
 	\caption{\em The zigzag scan from northwest to southeast corner. The goal is to catch long consecutive strings of zeroes.}
+	\label{fig:zigzag}
 \end{figure}
 
 This allows us to catch long strings of zeroes. In this case, the final $31$ entries are all zeroes, so run-length coding will prove to be highly profitable. Although the full JPEG standard includes several additional wrinkles, these are beyond the scope of the current discussion.
 
-The decoding procedure is a straightforward reversal of each of the coding steps: for each block, we first decode the run-length code, we unzigzag the data into the correct shape, we undampen it by multiplying by $\QQ$, and finally, we compute the inverse two-dimensional discrete cosine transform (inverse 2D DCT). Figure \ref{fig:blockrecon} shows the JPEG-decoded block side-by-side with its original counterpart. The overall average error in this block comes out to approximately $7$ values per pixel (on a $256$-value grayscale).
+The decoding procedure is a straightforward reversal of each of the coding steps: for each block, we first decode the run-length code, we unzigzag the data into the correct shape, we undampen it by multiplying by $\QQ$, and finally, we compute the inverse two-dimensional discrete cosine transform (inverse 2D DCT). Figure \ref{fig:blockrecon} shows the JPEG-decoded block side-by-side with its original counterpart. The overall average error in this block comes out to approximately $7$ values per pixel (on a $256$-value grayscale). Figure \ref{fig:comp_comparison} shows the whole image compressed. The average error across the whole image comes out to about $4$ values per pixel, with an overall compression ratio of around $8 : 1$. Despite artifacts being noticeable at the block level when zoomed in, as in Figure \ref{fig:blockrecon}, the overall image has no visible artifacts. 
+
+Lossy compression typically has a `sweet spot'---that is, a level of compression that achieves a significant data reduction without introducing noticeable artifacts. We also see in Figure \ref{fig:comp_comparison} the effect of going beyond this sweet spot and destroying the image quality: here, despite the attractive $100 : 1$ compression ratio, the image is unacceptably distorted.
 
 \begin{figure}
-\label{fig:blockrecon}
+
 	\centering
-	\includegraphics[scale=25]{chap4/figures/charles_block.png}
-	\includegraphics[scale=25]{chap4/figures/charles_block_reconstructed.png}
+	\includegraphics[scale=20]{chap4/figures/charles_block.png}
+	\includegraphics[scale=20]{chap4/figures/charles_block_reconstructed.png}
 	\caption{{\em{\bf Left:} The original, uncompressed $8\times8$ data block.} {\em{\bf Right:} The same $8 \times 8$ block after undergoing JPEG compression at quality $50$ percent. Observe the general smoothing, which is an artifact of the information lost during the dampening and rounding stage.}}
+\label{fig:blockrecon}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.4\textwidth]{chap4/figures/charles_gray_50.jpg}
+	\includegraphics[width=0.4\textwidth]{chap4/figures/charles_gray_5.jpg}
+	\caption{{\em{\bf Left:} A compression ratio of $8 : 1$ is achieved using the $50$ percent quality damping array with no visible artifacts.} {\em{\bf Right:} A compression ratio of $100 : 1$ is achieved using the $5$ percent quality damping array; however, there are many visible artifacts.}}
+\label{fig:comp_comparison}
 \end{figure}
 
 \section{A Subspace Compression Scheme}
@@ -231,19 +241,10 @@ Asymptotically, this mixed DCT/DST losslessly transforms an $O(N)$ eigenfunction
 
 Following from the previous discussion, we design a DCT-based, JPEG-like compression scheme. Each column of $\UU$ represents a vector field, and the columns are usually constructed using an SVD. Since this SVD has already minimized the amount of redundant information between columns, we compress them separately. Each column contain $x$, $y$ and $z$ velocity components, and we extract each of these components and compress them separately. Thus, if we describe the encoding procedure for a single scalar field, it can be applied to each velocity component of each column of $\UU$.
 
-Analogously to JPEG, given a 3D scalar field, we decompose it into small blocks of size $b \times b \times b$, adding continuous extra padding in the case that one or more resolutions are not evenly divisible by $b$. We then perform a 3D DCT on each block. In anticipation of quantization, the result is then normalized so that the largest frequency-domain value maps to the largest signed value for a 32-bit integer.
+Analogously to JPEG, given a 3D scalar field, we decompose it into small blocks of size $b \times b \times b$, adding continuous extra padding in the case that one or more resolutions are not evenly divisible by $b$. We then perform a 3D-DCT on each block. In anticipation of quantization, the result is then normalized so that the largest frequency-domain value maps to the largest signed value for a 32-bit integer.
 
-\noindent \textbf{Adaptive Quantization:} After transforming the signal to the frequency domain and normalizing the coefficients, JPEG then performs an element-wise division of the coefficients using a 2D quantization matrix in order to increase the likelihood that they will quantize to zero. In the JPEG standard, this matrix is adjusted depending on the quality setting; higher quality settings will have lower values to preserve more detail after dividing by the matrix, while lower quality settings will have higher values in the matrix to suppress more coefficients. For example, the following is the JPEG matrix that corresponds to 50\% quality:
-\begin{equation}
-\label{eqn:quant}
-\QQ = \begin{bmatrix}
-16 & 11 & 10 & 16  &\ldots\\
-12 & 12 & 14 & 19 & \ldots\\
-14 & 13 & 16 & 24  & \ldots \\
-14 & 17 & 22 & 29   & \ldots\\
-\vdots & \vdots      &  \vdots    &  \vdots      & \ddots
-\end{bmatrix} \in \R^{b \times b}.
-\end{equation}
+\noindent \textbf{Adaptive Quantization:} After transforming the signal to the frequency domain and normalizing the coefficients, as discussed in \S\ref{sec:jpeg}, the JPEG coding scheme then performs an element-wise division of the coefficients using a 2D quantization matrix in order to increase the likelihood that they will quantize to zero. In the JPEG standard, this matrix is adjusted depending on the quality setting; higher quality settings will have lower values to preserve more detail after dividing by the matrix, while lower quality settings will have higher values in the matrix to suppress more coefficients. For example, we previously saw in Equation \ref{eq:q50} the JPEG matrix corresponding to 50\% quality:
+
 We index the matrix entries $\QQ(u,v)$ such that the upper-left corner, $\QQ(0,0) = 16$, corresponds to the DC component.  The entries of $\QQ$ were obtained from perceptual data \cite{Sayood:2012:JPEG}, and in general, higher frequency components have larger entries in order to suppress these coefficients which tend to carry less information than those in the lower frequencies.
 
 Since we are not working with 2D color data but rather with 3D velocity fields, we need to construct a 3D version of this matrix, $\QQQ \in \R^{b \times b \times b}$. A close inspection of all of the complete matrix corresponding to Eqn.~\ref{eqn:quant} suggests that $\QQ(u,v) \propto u + v$, so a straightforward first attempt is:
@@ -256,18 +257,24 @@ We instead propose to automatically generate a variety of different $\QQQ$ matri
 \begin{equation}
 \QQQ(u,v,w) = (1 + u + v + w)^\gamma,
 \end{equation}
-where $\gamma$ is a parameter that is adjusted per block. Linear models are also possible, e.g.~$\QQQ(u,v,w) = \gamma\;(1 + u + v + w)$, but preliminary experiments found that this model was too simple to yield useful compressions. Analogous to the 2D case, the user specifies a quality parameter $p$. In 3D, we interpret $p$ as the percentage of the original energy that should be preserved. Each block then performs a bisection search over the range $\gamma \in [0, n]$, where $n = 32$ is the number of bits that were used for normalization prior to quantization. Higher values of $n$ are essentially meaningless, as they damp everything except the DC component to zero. In practice, we found that this bisection search terminates within a very small tolerance of the desired energy preservation after at most 8 iterations.
+where $\gamma$ is a parameter that is adjusted per block. Linear models are also possible, e.g.~$\QQQ(u,v,w) = \gamma\;(1 + u + v + w)$, but preliminary experiments found that this model was too simple to yield useful compressions. Analogous to the 2D case, the user specifies a quality parameter $p$. In 3D, we interpret $p$ as the percentage of the original energy\footnote{That is, $L_2$ norm.} that should be preserved. Each block then performs a bisection search over the range $\gamma \in [0, n]$, where $n = 32$ is the number of bits that were used for normalization prior to quantization. Higher values of $n$ are essentially meaningless, as they damp everything except the DC component to zero. In practice, we found that this bisection search terminates within a very small tolerance of the desired energy preservation after at most $8$ iterations.
 
 This approach provides a custom quantization matrix for each block while maintaining an approximately constant energy loss per block. Important high-frequency components are preserved when they are present, while smoother, low-frequency blocks are still aggressively compressed. This block-varying value $\gamma$ must then be computed by the encoder and provided to the decoder in the encoded bytestream. For an $8 \times 8 \times 8$ block, the memory footprint of a single additional scalar $\gamma$ per block is negligible. We compare this strategy to a uniform non-adaptive quantization approach in \S\ref{sec:Results}.
 
 \noindent \textbf{Flattening and Encoding:} After quantization, we convert the 3D array into a 1D array and perform run-length encoding \cite{Yeo:1995:VRD,Sayood:2012:JPEG}. No novel strategy needs to be devised for this component. The 3D to 1D conversion is performed in a zigzag pattern that is a straightforward 3D extension of the usual 2D JPEG ordering, which tries to group coefficients with similar sizes together in the bytestream.  In our case, the entries of $\QQQ(u,v,w)$ are arranged in increasing order of their sum $u + v + w$, which effectively clusters components with approximately the same frequency. The results are then run-length encoded in order to discover long runs of zeros.
 
 \begin{figure}
-\label{fig:flowchart}
 \includegraphics[width=\textwidth]{chap4/figures/compression_flowchart.png}
 \caption{\em An overview of the encoding pipeline.}
+\label{fig:flowchart}
 \end{figure}
 
+\begin{figure}
+\centering
+\includegraphics[width=0.5\textwidth]{chap4/figures/zigzag3d.png}
+\caption{\em The 3D zigzag scan order. We move along slice planes of increasing index sum $c = 1 + u + v + w$.}
+\label{fig:zigzag3d}
+\end{figure}
 
 \subsection{Subspace Decompression}
 \label{sec:decompress}
