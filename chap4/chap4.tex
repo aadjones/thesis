@@ -1,6 +1,9 @@
 \chapter[Transform-based compression of fluid subspaces]{Transform-based compression of fluid subspaces}
 
-In the previous chapter, we discussed the potential for subspace methods to accelerate the computational cost of physics-based simulations. However, a significant drawback of the subspace approach is the time/memory tradeoff: the speed increase comes at a cost of much larger memory requirements. Specifically, subspace simulations can easily consume dozens of gigabytes of memory when dealing with high-resolution scenes. In this chapter, we discuss a compression method to reduce the memory footprint of subspace methods by an order of magnitude. 
+Note: A large portion of this chapter has previously appeared as~\cite{Jones:2016:CFS}.
+\bigskip\bigskip
+
+In the previous chapter, we discussed the potential for subspace methods to accelerate the computational cost of physics-based simulations. However, a significant drawback of the subspace approach is the time/memory tradeoff: the speed increase comes at a cost of much larger memory requirements. Specifically, subspace simulations can easily consume dozens of gigabytes of memory when dealing with high-resolution scenes. In this chapter, we discuss a compression method to reduce the memory footprint of subspace methods by an order of magnitude. Using such a compression scheme will allow us to compute longer and more complex scenes on powerful computers, while at the same time giving us the ability to compute scenes of reasonable complexity on laptop computers.
 
 \section{Previous Work}
 Since memory consumption is a known challenge with subspace techniques, other research has focused on reducing the memory footprint of these simulations. In the applications of sound \cite{Langlois:2014:ECM} and blendshape matrices \cite{Seo:2011:CDM}, compression techniques have been developed; however, we are unaware of analogous research in subspace fluid simulation. In the work of Wicke et al.~\cite{Wicke:2009}, a modular fluid basis is used that can be tiled throughout the domain. However, our approach is complementary, as the modular tiles themselves could be further compressed by applying our algorithm.
@@ -11,7 +14,7 @@ The general problem of data compression at first blush seems daunting: how do we
 
 Data compression algorithms can be divided into two distinct families: lossless and lossy. A lossless compression algorithm is able to take an input signal, compress it, and reconstruct the exact same input signal. A simple example is run-length coding. For instance, to represent 100 white pixels, followed by 200 black pixels, followed by an another 50 white pixels, we can code the sequence (`w', 100), (`b', 200), (`w', 50), rather than coding the 350 pixels individually. Decoding is straightforward and retains all information. The ZIP file format is a familiar example of widely-used lossless data compression.
 
-Lossless compression can be very powerful when applied to original data with many redundancies; however, it has strict limitations based on the mathematics of information theory. Every file, no matter how redundant, contains a certain amount of information. \todo{Add details about information theory/entropy.}
+Lossless compression can be very powerful when applied to original data with many redundancies; however, it has strict limitations based on the mathematics of information theory. Every file, no matter how redundant, contains a certain amount of information. Thus, for instance, after using run-length coding once on a file that previously contained many long sequential redundancies, trying to use it a second time on the newly compressed file will actually {\em increase} the file size, since there will no longer be any runs!
 
 Lossy compression, by contrast, may not be able to reconstruct the exact same input signal. Its applications tend to focus on perceptual data, such as images, video, and sound. Although its reconstructions are not perfectly faithful, if the technique is soundly based on the limits of human perception, the results are virtually indistinguishable. The JPEG file format for images is a widely-used lossy data compression algorithm.
 
@@ -20,16 +23,59 @@ Data streams of images oftentimes contain more information than a human can reas
 \subsection{Mathematical Preliminaries}
 In order to describe transform coding formally, we will require several notions from linear algebra and analysis.
 \subsubsection{Vector Spaces}
-The basic framework of most of our data manipulation can be expressed through the notion of vector spaces. We are familiar with the physical notion of vectors in two- or three-dimensional space as quantities with both a magnitude and a direction, often depicted graphically with an arrow. \todo{Add figure of a 2D vector.} For convenience, we often represent vectors using coordinates. We can view the coordinate representation as a decomposition into fundamental unit vectors pointing in the $x$ and $y$ direction. These are called the {\em basis} vectors. Any arbitrary vector can be decomposed uniquely into a combination of these basis vectors. 
+The basic framework of most of our data manipulation can be expressed through the notion of vector spaces. We are familiar with the physical notion of vectors in two- or three-dimensional space as quantities with both a magnitude and a direction, often depicted graphically with an arrow, as in Figure~\ref{fig:vec2d}. For convenience, we often represent vectors using coordinates. We can view the coordinate representation as a decomposition into fundamental unit vectors pointing in the $x$ and $y$ direction. These are called the {\em basis} vectors. Any arbitrary vector can be decomposed uniquely into a combination of these basis vectors. 
+
+\begin{figure}[h]
+\centering
+\begin{asy}
+	arrowhead MyHead;
+	MyHead.head=new path(path g, position position=EndPoint, pen p=currentpen,
+                          real size=0, real angle=arrowangle) {
+                          arrowfactor=3;
+  if(size == 0) size=MyHead.size(p);
+  bool relative=position.relative;
+  real position=position.position.x;
+  if(relative) position=reltime(g,position);
+  path r=subpath(g,position,0);
+  pair x=point(r,0);
+  real t=arctime(r,size);
+  pair y=point(r,t);
+  path base=arrowbase(r,y,t,size);
+  path left=rotate(-angle,x)*r;
+  path right=rotate(angle,x)*r;
+  real[] T=arrowbasepoints(base,left,right);
+  return subpath(left,0,T[0])--point(r,.5*t)--subpath(right,T[1],0)&cycle;
+};
+
+size(250);
+pair O, P, Q, X, Y;
+O = (0, 0);
+P = (4, 0);
+Q = (4, 3);
+X = (5, 0);
+Y = (0,4);
+draw(O--X);
+draw(O--Y);
+
+draw(O--Q, 1.0bp+red, Arrow(MyHead));
+label("$\mathbf{v}$", O--Q, NW);
+draw(O--P, 1.5bp+blue, Arrow(MyHead));
+label("$\mathbf{v}_x$", O--P, S);
+draw(P--Q, 1.5bp+blue, Arrow(MyHead));
+label("$\mathbf{v}_y$", P--Q, E);
+\end{asy}
+\caption{\em A 2D vector $\vv$ decomposed into its orthogonal components $\vv_x$ and $\vv_y$.}
+\label{fig:vec2d}
+\end{figure}
 
 Vectors can be added or subtracted, producing another vector. They can also be multiplied by a scalar (i.e.,~a number in $\R$ or $\C$), yielding another vector. The formalization of this idea is the mathematical concept of a {\em vector space}, which allows for a more abstract treatment of vectors. For example, an image represented on a computer as a sequence of $N$ pixel values can be regarded as a vector living in the vector space $\R^N$. This abstraction allows us to bring the tools of linear algebra to bear on a variety of seemingly different applications.
 
 \subsubsection{Inner Products} \label{sec:innerprod}
-Recall that an {\em inner product}, or dot product, is a binary operation $\langle \cdot, \cdot \rangle$ between two vectors that yields a scalar as an output. The most familiar example is in $\R^2$, where, given two vectors $\vv = (v_1, v_2)$ and $\ww = (w_1, w_2)$, we have $\langle \vv, \ww \rangle = v_1w_1 + v_2w_2$. Inner products add a notion of geometry to a vector space through angles and length: when an inner product between two vectors is $0$, the vectors are orthogonal; and the inner product of a vector with itself gives the square of its length. For example, the basis vectors $\ee_x = (1, 0)$ and $\ee_y = (0, 1)$ are orthogonal, and the vector $\vv = (3, 4)$ has squared length $\langle \vv, \vv \rangle = 3^2 + 4^2 = 5^2$. Inner products also are closely related to the projection of one vector onto another. For example, if we take an arbitrary vector $\vv = (v_1, v_2)$ and take its inner product with the basis vector $\ee_y = (0, 1)$, the result is the component $v_2$ in the $y$ direction. In general, given a set of unit basis vectors which are mutually orthogonal (known as an {\em orthonormal} basis), we can compute the various components of arbitrary vectors by calculating their inner products with the corresponding basis vector.
+Recall that an {\em inner product}, or dot product, is a binary operation $\langle \cdot, \cdot \rangle$ between two vectors that yields a scalar as an output. The most familiar example is in $\R^2$, where, given two vectors $\vv = (v_x, v_y)$ and $\ww = (w_x, w_y)$, we have $\langle \vv, \ww \rangle = v_x w_x + v_y w_y$. Inner products add a notion of geometry to a vector space through angles and length: when an inner product between two vectors is $0$, the vectors are orthogonal; and the inner product of a vector with itself gives the square of its length. For example, the basis vectors $\ee_x = (1, 0)$ and $\ee_y = (0, 1)$ are orthogonal, and the vector $\vv = (3, 4)$ has squared length $\langle \vv, \vv \rangle = 3^2 + 4^2 = 5^2$, which matches with the usual Euclidean notion of squared length. Inner products also are closely related to the projection of one vector onto another. For example, if we take an arbitrary vector $\vv = (v_x, v_y)$ and take its inner product with the unit basis vector $\ee_y = (0, 1)$, the result is the component $v_y$ in the $y$ direction. In general, given a set of unit basis vectors which are mutually orthogonal (known as an {\em orthonormal} basis), we can compute the various components of arbitrary vectors by calculating their inner products with the corresponding basis vector.
 
-Besides the familiar inner product in $\R^2$, more general inner products exist in other vector spaces. The canonical inner product in $\C^n$ is given by $\langle \vv, \ww \rangle = \displaystyle \sum_{k=1}^{n}v_k\overline{w_k}$, where the overbar denotes the complex conjugate. The conjugate may seem strange, but is necessary to preserve the notion that taking an inner product of a vector with itself should give the squared length of the vector. The canonical inner product in the function space $L_2([-\pi, \pi])$, the space of functions on the interval $[-\pi, \pi]$ with finite energy, is given by $\langle f, g \rangle  = \displaystyle \int_{-\pi}^{\pi}f(x)\overline{g(x)}dx$.
+Besides the familiar inner product in $\R^2$, more general inner products exist in other vector spaces. The canonical inner product in $\C^n$ is given by $\langle \vv, \ww \rangle = \displaystyle \sum_{k=1}^{n}v_k\overline{w_k}$, where the overbar denotes the complex conjugate. The conjugate may seem strange, but is necessary to preserve the notion that taking an inner product of a vector with itself should give the squared length of the vector. 
 
-\subsubsection{The Discrete Fourier Transform}
+\subsubsection{The Discrete Fourier Transform} \label{sec: DFT}
 The {\em Discrete Fourier Transform}, or DFT, is a transformation that maps one vector in $\C^{N}$ to another vector $\C^{N}$. Given a vector $\xx = \left(x_0, x_1, \dots, x_{N-1}\right)$, the DFT maps $\xx$ to the output $\XX = \left(X_0, X_1, \dots, X_{N-1}\right)$, where
 
 \begin{equation}
@@ -62,10 +108,10 @@ Recalling the definition of the complex inner product given in \S\ref{sec:innerp
 \end{align}
 
 This interpretation of projecting against the Fourier basis will prove more useful than the explicit formula for having an intuition about what the DFT is doing under the hood.
-In fact, using this interpretation, we can even write the DFT as the following $N \times N$ change-of-basis matrix $\mathcal{F}$, with each of the $N$ columns given by the corresponding $\boldomega^k$ vector:
+In fact, using this interpretation, we can even write the DFT as the following $N \times N$ change-of-basis matrix $\fancyF$, with each of the $N$ columns given by the corresponding $\boldomega^k$ vector:
 
 \begin{align}
-	\mathcal{F} &= \begin{pmatrix}
+	\fancyF &= \begin{pmatrix}
     		\vertbar & \ \  \vertbar & \ \ \ \ \ \ \ \ \  \vertbar & & \vertbar \\
     		\boldomega^0  & \ \   \boldomega^1  & \ \ \ \ \ \ \ \ \  \boldomega^2 & \ \ \ \ \ \dots & \ \ \ \ \ \ \boldomega^{N-1} \\
  		\vertbar & \ \  \vertbar & \ \ \ \ \ \ \ \ \  \vertbar & & \vertbar 
@@ -79,7 +125,20 @@ In fact, using this interpretation, we can even write the DFT as the following $
 	\end{pmatrix}	
 \end{align}
 
-Thus, the DFT of a vector $\xx \in \C^N$ can now simply be defined by the matrix-vector multiplication $\mathcal{F} \xx = \XX$.
+Thus, the DFT of a vector $\xx \in \C^N$ can now simply be defined by the matrix-vector multiplication $\fancyF \xx = \XX$. In particular, since we already observed that the $N$ column vectors of this matrix form on orthogonal basis for $\C^N$, by normalizing the DFT matrix to make each column have unit magnitude, we obtain the {\em unitary} form of the DFT:
+
+\begin{equation}
+	\fancyF_{\textrm{unitary}} = \frac{1}{\sqrt{N}} \fancyF
+\end{equation}
+
+Being unitary means that $\fancyF_{\textrm{unitary}}$ preserves inner products. In other words, for any vectors $\vv, \ww \in \C^N$, we have
+
+\begin{equation}
+	\langle \fancyF_{\textrm{unitary}}\vv, \fancyF_{\textrm{unitary}}\ww \rangle = \langle \vv, \ww \rangle
+\end{equation}
+We shall exploit this property later on in \S\ref{sec:decompress}.
+
+The asymptotic run-time of the DFT of a vector $\xx \in \C^N$, if implemented as a matrix-vector multiply, would be $O(N^2)$, as we must compute $N$ multiply-adds for each of the $N$ columns. However, the well-known fast Fourier transform (FFT) algorithm, by recursively expressing the $N$-point DFT in terms of smaller $N/2$-point DFTs, is able to compute the same result in $O(N \log{N})$ time, making it much more practical for large inputs.~\cite{1965-cooley}
 
 The multidimensional DFT applies takes multidimensional arrays of inputs rather than vectors. For example, the two-dimensional DFT of the array $\xx \in \C^{M \times N}$ is given by
 the array $\XX \in \C^{M \times N}$ whose entries are
@@ -243,17 +302,17 @@ Following from the previous discussion, we design a DCT-based, JPEG-like compres
 
 Analogously to JPEG, given a 3D scalar field, we decompose it into small blocks of size $b \times b \times b$, adding continuous extra padding in the case that one or more resolutions are not evenly divisible by $b$. We then perform a 3D-DCT on each block. In anticipation of quantization, the result is then normalized so that the largest frequency-domain value maps to the largest signed value for a 32-bit integer.
 
-\noindent \textbf{Adaptive Quantization:} After transforming the signal to the frequency domain and normalizing the coefficients, as discussed in \S\ref{sec:jpeg}, the JPEG coding scheme then performs an element-wise division of the coefficients using a 2D quantization matrix in order to increase the likelihood that they will quantize to zero. In the JPEG standard, this matrix is adjusted depending on the quality setting; higher quality settings will have lower values to preserve more detail after dividing by the matrix, while lower quality settings will have higher values in the matrix to suppress more coefficients. For example, we previously saw in Equation \ref{eq:q50} the JPEG matrix corresponding to 50\% quality:
+\noindent \textbf{Adaptive Quantization:} After transforming the signal to the frequency domain and normalizing the coefficients, as discussed in \S\ref{sec:jpeg}, the JPEG coding scheme then performs an element-wise division of the coefficients using a 2D quantization matrix in order to increase the likelihood that they will quantize to zero. In the JPEG standard, this matrix is adjusted depending on the quality setting; higher quality settings will have lower values to preserve more detail after dividing by the matrix, while lower quality settings will have higher values in the matrix to suppress more coefficients. For example, we previously saw in Equation \ref{eq:q50} the JPEG matrix corresponding to 50\% quality.
 
-We index the matrix entries $\QQ(u,v)$ such that the upper-left corner, $\QQ(0,0) = 16$, corresponds to the DC component.  The entries of $\QQ$ were obtained from perceptual data \cite{Sayood:2012:JPEG}, and in general, higher frequency components have larger entries in order to suppress these coefficients which tend to carry less information than those in the lower frequencies.
+We index the matrix entries $\QQ(u,v)$ such that the upper-left corner, $\QQ(0,0) = 16$, corresponds to the DC (i.e.,~direct current, or zero frequency) component.  The entries of $\QQ$ were obtained from perceptual data \cite{Sayood:2012:JPEG}, and in general, higher frequency components have larger entries in order to suppress these coefficients which tend to carry less information than those in the lower frequencies.
 
-Since we are not working with 2D color data but rather with 3D velocity fields, we need to construct a 3D version of this matrix, $\QQQ \in \R^{b \times b \times b}$. A close inspection of all of the complete matrix corresponding to Eqn.~\ref{eqn:quant} suggests that $\QQ(u,v) \propto u + v$, so a straightforward first attempt is:
+Since we are not working with 2D color data but rather with 3D velocity fields, we need to construct a 3D version of this matrix, $\QQQ \in \R^{b \times b \times b}$. A close inspection of all of the complete matrix corresponding to Eqn.~\ref{eq:q50} suggests that $\QQ(u,v) \propto u + v$, so a straightforward first attempt is:
 \begin{equation}
 \QQQ(u,v,w) = 1 + u + v + w.
 \end{equation}
 Other applications \cite{Yeo:1995:VRD} have used similar reasoning to arrive at similar matrices. However, while the 2D case has a suite of $\QQ$ matrices at its disposal that correspond to different levels of perceived visual quality, this data does not generalize to non-chromatic, 3D velocity data.
 
-We instead propose to automatically generate a variety of different $\QQQ$ matrices during the compression stage. For each $b \times b \times b$ block, the energy is likely to reside in different frequencies, so we generate a custom matrix,
+We instead propose to automatically generate a variety of different $\QQQ$ matrices during the compression stage. For different $b \times b \times b$ blocks, the energy is likely to reside in different frequencies, so we generate a one-parameter family of matrices,
 \begin{equation}
 \QQQ(u,v,w) = (1 + u + v + w)^\gamma,
 \end{equation}
@@ -285,16 +344,15 @@ The decompression proceeds in two stages, where an initial pass assembles the ba
 
 \noindent \textbf{Projection and Reconstruction:} The fast projection and reconstruction requirements from \S\ref{sec:subspace} are not as straightforward. A na\"{i}ve strategy is to decompress the entire matrix $\UU$ for each projection and reconstruction. For a given block size $B = b \times b \times b$, this results in $\frac{3N \times r}{B}$ DCTs and IDCTs at every timestep. These transforms dominate the running time (Table \ref{tab:naive-vs-sparse}), and largely negate the performance gains of the subspace approach. While memory savings are achieved, the speed-memory tradeoff is unacceptable.
 
-However, we observe that both of the matrix-vector products $\UU\utilde = \uu$ and $\UU^T\uu = \utilde$ can be performed {\em sparsely in the frequency domain}. The projection operator then only performs a DCT on $\uu$, not all $r$ columns of $\UU$. This operation is permissible because the DCT is a unitary transform, and therefore preserves inner products. Specifically, if $\xx$ and $\yy$ are vectors in the spatial domain and $\xhat$ and $\yhat$ are their counterparts in the frequency domain, $\langle \xx, \yy \rangle = \langle \xhat, \yhat \rangle$, where $\langle \cdot, \cdot \rangle$ denotes the usual Euclidean inner product.
+However, we observe that both of the matrix-vector products $\UU\utilde = \uu$ and $\UU^T\uu = \utilde$ can be performed {\em sparsely in the frequency domain}. The projection operator then only performs a DCT on $\uu$, not all $r$ columns of $\UU$. This operation is permissible because the DCT is a unitary transform, and therefore preserves inner products, as seen in \S\ref{sec: DFT}. Specifically, if $\xx$ and $\yy$ are vectors in the spatial domain and $\xhat$ and $\yhat$ are their counterparts in the frequency domain, $\langle \xx, \yy \rangle = \langle \xhat, \yhat \rangle$, where $\langle \cdot, \cdot \rangle$ denotes the usual Euclidean inner product.
 
 We define the following notation to describe the advantages of this approach. The frequency domain version of a quantity is denoted with a hat, e.g., $\UU$ with DCT applied to each column is $\Uhat$. The {\em lossy, compressed} version of $\Uhat$, where near-zero values have been quantized to zero, is denoted $\Chat$. The spatial domain version of $\Chat$ is correspondingly $\CC$. In essence, our compression scheme has introduced the approximations $\UU \approx \CC$ and $\Uhat \approx \Chat$.
 
-
 Using the unitary property, we can see that if we use DCT to transform $\uu$ to $\uhat$, then $\UU^T\uu = \utilde$ is equivalent to $\Uhat^T\uhat = \utilde$. Using the compressed versions will yield a result slightly different from $\qq$, but the same relation holds: $\CC^T\uu = \Chat^T\uhat \approx \utilde$. The na\"{i}ve approach spends most of its time transforming $\Chat$ to $\CC$, but by constructing $\uhat$, we can avoid this stage altogether. Replacing the IDCT over all $r$ columns of $\Chat$ with a single DCT of $\uu$ is significant, because even for a modest $r = 10$, the number of transforms is reduced by an order of magnitude. Additionally, the $\Chat^T\uhat$ product can now exploit the sparsity of $\Chat$ that was discovered by the compression stage. Since $\Chat$ is static over the lifetime of a simulation, the location of all the zero entries can be cached, and these multiplies can be skipped. 
 
-A fast reconstruction strategy then follows: $\Chat\utilde \approx \uhat$. The sparsity of $\Chat$ can again be exploited here, as each column $\Chat$ is scaled by an entry of $\utilde$, and all the multiplies with respect to zeroes can again be skipped. Once $\uhat$ is known, an IDCT can be performed on it once, and IDCTs over all $r$ columns of $\Chat$ is again avoided.
+A fast reconstruction strategy then follows due to the linearity of the DCT: $\Chat\utilde \approx \uhat$. The sparsity of $\Chat$ can again be exploited here, as each column $\Chat$ is scaled by an entry of $\utilde$, and all the multiplies with respect to zeroes can again be skipped. Once $\uhat$ is known, an IDCT can be performed on it once, and IDCTs over all $r$ columns of $\Chat$ is again avoided.
 
-For a $\CC$ matrix containing ${3N \times r}$ non-zero entries, after taking the complexity of the DCTs and IDCTs into account, na\"{i}ve projection and reconstruction each take $O\left(3N \times r +\frac{3N \times r}{B} B \log B\right) = O\left((3N \times r)\log B\right)$ time. Using our approach, a $\Chat$ containing $S$ non-zero entries instead takes $O\left(S + \frac{3N}{B} B \log B\right) = O\left(S + 3N \log B\right)$ time. The $r$ factor has been removed as a multiplier of $\log B$, and replaced with the additive $S$ term. As seen in Table \ref{tab:naive-vs-sparse}, this results in speedups that approach an order of magnitude.
+For a $\CC$ matrix containing ${3N \times r}$ non-zero entries, after taking the complexity of the DCTs and IDCTs from \S\ref{sec: DFT} into account, na\"{i}ve projection and reconstruction each take $O\left(3N \times r +\frac{3N \times r}{B} B \log B\right) = O\left((3N \times r)\log B\right)$ time. Using our approach, a $\Chat$ containing $S$ non-zero entries instead takes $O\left(S + \frac{3N}{B} B \log B\right) = O\left(S + 3N \log B\right)$ time. The $r$ factor has been removed as a multiplier of $\log B$, and replaced with the additive $S$ term. As seen in Table \ref{tab:naive-vs-sparse}, this results in speedups that approach an order of magnitude.
 
 \subsection{Discussion}
 
@@ -305,7 +363,6 @@ The motivating example from \S\ref{sec:laplacian} uses mixed DST and DCT to achi
 The $\UU$ matrix is usually constructed using an SVD \cite{Treuille:2006:MRF,Kim2013} or an eigenanalysis \cite{DeWitt:2012,Liu:2015:MVF}. Therefore, corresponding singular values or eigenvalues are usually available for each column of $\UU$. These values could be used to guide the compressor, e.g.,~by allowing columns with unimportant singular values $\sigma_i$ to be compressed more aggressively. However, we found that the relationship between $\sigma_i$ and visual quality is not straightforward. Especially during re-simulation, columns that had unimportant $\sigma_i$ during the initial analysis can obtain large coefficients in $\utilde$. In such cases, the aggressive compression can become visible.
 
 Prior to compression, an additional SVD could be run on each $b \times b \times b$ block in $\UU$ to determine if there is a superior coordinate system for compression other than the canonical $x$, $y$, and $z$ axes. However, the per-block rotation that this introduces breaks the fast matrix-vector multiply described in \S\ref{sec:decompress}. Thus, we put this aside in favor of the fast multiplies, but a method that supports both operations is an interesting direction for future work.
-
 
 \begin{figure}
 		\centering
@@ -404,7 +461,7 @@ Compression preprocess & N/A & 01h 09m 37s & 01h 08m 25s & 01h 26m 57s & 02h 18m
 
 The SVD to construct the subspace from this data took 07h 05m 40s, and the compressing the subspace took at most 02h 15m 59s (Table \ref{table:timing-comparisons}). Constructing and compressing the subspace is therefore roughly at parity with running the entire simulation a second time. However, once the subspace has been constructed once, we can run new simulations very quickly.
 
-We found that the subspace could be compressed by roughly an order of magnitude ($11:1$) before the visual quality began to degrade. However, we also noted that the compression scheme appears to degrade relatively gracefully. For higher compression rates, the motion gradually deviates from the uncompressed motion, and JPEG-like block artifacts begin to appear.
+We found that the subspace could be compressed by roughly an order of magnitude ($11:1$) before the visual quality began to degrade. However, we also noted that the compression scheme appears to degrade relatively gracefully. For higher compression rates, the motion gradually deviates from the uncompressed motion, and JPEG-like block artifacts begin to appear (cf. the actual JPEG artifacts exhibited in \S\ref{sec: JPEG}).
 
 \begin{figure}[t]
 \includegraphics[width=\columnwidth]{chap4/figures/spheres_sidebyside_14.png}
@@ -416,13 +473,11 @@ We found that the subspace could be compressed by roughly an order of magnitude 
 
 Surprisingly, we found that this subspace compressed slightly better than the plume scene ($14:1$) before the visual quality began to degrade. The expectation was that the sphere boundary would create a discontinuity in the velocity field that the compressor would have trouble capturing. Instead, the interior of the static obstacle created a region of constant (zero) velocity, and also induced the formation of smooth, near-zero regions in its vicinity. Rather than create a discontinuity containing many high frequencies, these constant and smooth regions mostly contained low-frequencies that the compressor could easily leverage. No-slip boundaries were used along the surface of the obstacle; if free-slip were used instead, the anticipated discontinuities may still appear.
 
-For this scene, we also compared our adaptive quantization strategy to a uniform, non-adaptive approach. There is no canonical 3D version of Eqn.~\ref{eqn:quant}, so we instead selected a uniform $\gamma$ that produced an equivalent energy loss in the highest frequency component, i.e.,~we set $\gamma$ such that it matched the 32-bit equivalent of the lower-right hand entry of Eqn.~\ref{eqn:quant}. This strategy still produced a $7:1$ compression, but our adaptive strategy was able to achieve a higher compression of $14:1$.
+For this scene, we also compared our adaptive quantization strategy to a uniform, non-adaptive approach. There is no canonical 3D version of Eqn.~\ref{eq:q50}, so we instead selected a uniform $\gamma$ that produced an equivalent energy loss in the highest frequency component, i.e.,~we set $\gamma$ such that it matched the 32-bit equivalent of the lower-right hand entry of Eqn.~\ref{eq:q50}. This strategy still produced a $7:1$ compression, but our adaptive strategy was able to achieve a higher compression of $14:1$.
 
 \noindent \textbf{Out-of-core Comparison:} We compared our performance to an uncompressed simulation that does not fit in core by running the $14 : 1$ version of the sphere scene on a 2-core, 1.8 GHz Macbook Air with 8 GB RAM. On this system, the full space simulation ran at 286.5s per frame, while our compressed subspace simulation ran at 71.7s, yielding a speedup of roughly $4.0\times$.
 
 The uncompressed subspace simulation requires over 70 GB of memory, and immediately started to swap on the 8 GB system. It ran for over 17 hours without completing a single frame, at which time it had more than doubled the running time of the original full space simulation, and was terminated.
-
-%(Table \ref{tab:thrashing}), achieving a factor of 4 speedup over the full-space simulation. In contrast, the uncompressed subspace approach cannot even be run to completion on this machine due to memory constraints. \todo{Would be better if you said something like "it started swapping, and we let it run for a day before killing it"}
 
 \begin{figure*}[t]
 \includegraphics[width= \columnwidth]{chap4/figures/fan_sidebyside.png}
