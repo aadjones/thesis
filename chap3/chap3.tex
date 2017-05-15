@@ -1,1 +1,26 @@
 \chapter[Background]{Background}
+\section{Fluids}
+
+A {\em fluid}, formally speaking, is a substance that continuously deforms under the application of shear stress. \TODO{citation}. More intuitively, it is a substance that {\em flows}. Although colloquially we may use the term fluid to refer only to liquids, gases can exhibit flow, and are therefore considered to be fluids as well. (Indeed, the results demonstrated in this dissertation focus entirely on the turbulent flow of smoke.) The natural world is full of captivating fluid motions: ocean waves, ripples in a pond, clouds, the steam of a teakettle, etc. These flowing patterns, while beautiful, appear difficult to formalize precisely, and the modeling of fluids continues to be a mathematical and computational challenge to this day.
+
+\section{Physics-based modeling}
+The field of {\em fluid dynamics} in physics seeks to model and describe fluid flow systematically according to equations generated from a set of basic assumptions and principles. In order for continuous mathematical operators to be used to describe fluids, one of the basic assumptions is that of the {\em continuum}: for mathematical purposes, we assume that fluid velocity varies continuously across space, even though in reality, fluids are actually composed of discrete molecules. Besides this continuum assumption, the various conservation laws of mass, energy, and momentum, imply the famous Navier-Stokes equations, which describe fluid flow depending on the intrinsic stress of viscosity and pressure:
+
+\begin{equation}
+\nabla \cdot \uu = 0
+\end{equation}
+\begin{equation}
+\frac{\partial \uu}{\partial t} = -\left(\uu \cdot \nabla \right)\uu + \nu \nabla^{2}\uu - \nabla{p} + \mathbf{f}_e
+\end{equation}
+
+\section{Simulation}
+
+Simulation is, of course, the imitation of a natural process, in this case over time. Any simulation must first determine a technique of modeling the process computationally, and there are often many different possible strategies. We consider here a few typical approaches in computational fluid dynamics.
+
+One of the most direct ways of modeling fluids is to consider them as a set of time-evolving velocity fields over a region of space. To perform the calculations, we dice up the region of space into a regular grid of small cubical cells. Each cell then contains a vector, or arrow, describing the velocity of the fluid at the position in space. In order to evolve the motion of the flow over time, we also dice up time itself into a sequence of discrete time steps, computing how the velocity of the fluid in each cell changes at each time step. This approach is called the {\em Eulerian} viewpoint of the flow. More concretely, it describes a velocity field 
+
+\begin{equation}
+\uu = \uu(\xx, t)
+\end{equation}
+
+depending on spatial position $\xx$ and time $t$.
