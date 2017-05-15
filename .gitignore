@@ -17,7 +17,7 @@
 # these rules might exclude image files for figures etc.
 # *.ps
 # *.eps
-# *.pdf
+*.pdf
 
 ## Bibliography auxiliary files (bibtex/biblatex/biber):
 *.bbl
@@ -50,6 +50,10 @@ acs-*.bib
 *.nav
 *.snm
 *.vrb
+
+# asymptote
+*.asy
+*.pre
 
 # cprotect
 *.cpt
