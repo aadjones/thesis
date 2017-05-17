@@ -29,7 +29,23 @@ Equation \cite{eq:incompress} enforces the assumption of incompressibility, whil
 
 Simulation is, of course, the imitation of a natural process, in this case over time. Any simulation must first determine a technique of modeling the process computationally, and there are often many different possible strategies. We consider here a few typical approaches in computational fluid dynamics.
 
-One of the most direct ways of modeling fluids is to discretize both the spatial and time domain. In other words, to perform the calculations, we dice up the region of space into a regular grid of small cubical cells. Each cell then contains a vector, or arrow, describing the velocity of the fluid at the position in space. In order to evolve the motion of the flow over time, we also dice up time itself into a sequence of discrete time steps, computing how the velocity of the fluid in each cell changes at each time step. This approach is called the {\em Eulerian} viewpoint of the flow. 
+One of the most direct ways of modeling fluids is to discretize both the spatial and time domain. In other words, to perform the calculations, we dice up the region of space into a regular grid of small cubical cells. Each cell then contains a vector, or arrow, describing the velocity of the fluid at the position in space. In order to evolve the motion of the flow over time, we also dice up time itself into a sequence of discrete time steps, computing how the velocity of the fluid in each cell changes at each time step. This approach is called the {\em Eulerian} viewpoint of the flow. Intuitively, this can be thought of as staying in a fixed location and observing the flow through that particular location. More precisely, the fluid's velocity in this viewpoint is represented as $\uu(\xx, t)$, which gives the velocity of the fluid at each spatial location $\xx$ and time $t$.
+
+In contrast, the {\em Lagrangian} viewpoint of the flow takes the point of view of each individual fluid particle as it moves along the flow through space and time. Intuitively, this can be thought of drifting along with the flow. If we label each particle based on its position in space using a vector field $\mathbf{r}$, we then describe the fluid flow with the position field $\mathbf{X}(\mathbf{r}, t)$ , which gives the position of each particle labeled by $\mathbf{r}$ at time $t$.
+
+We can connect these two viewpoints with the following equation:
+\begin{equation}
+\label{eq:euler-lagrange}
+\uu\left(\mathbf{X}\left(\mathbf{r}, t\right)\right) = \frac{\partial \mathbf{X}}{\partial t}\left(\mathbf{r}, t\right)
+\end{equation}
+
+The left-hand side of equation \ref{eq:euler-lagrange} describes the velocity of the flow at position $\mathbf{r}$ and time $t$ using the Eulerian-specified velocity field $\uu$, while the right-hand side describes the same velocity by taking the partial derivative of the Lagrangian specified position field $\mathbf{X}$.
+
+Given an Eulerian-specified fluid velocity field $\uu(\xx, t)$ over a domain of space, and given another Eulerian-specified scalar field $\varphi(\xx, t)$ (e.g., temperature) over the same domain, we can consider the total derivative of $\phi$. By the chain rule, this expands as follows:
+
+\begin{equation}
+\frac{d}{dt}\left(\xx, t\right) = \frac{\partial \varphi}{\partial t} + 
+\end{equation}
 
 \section{Subspace Methods}
-Subspace methods, also known as model reduction, or reduced order methods, have been used in many types of simulations, including fluid dynamics. The basic principle of these methods, as the name suggests, is to reduce the computational complexity of a large numerical simulation. A typical simulation will have many degrees of freedom in principle, generating a vast state space of possibilities. However, in practice, not all of these degrees of freedom are of equal importance. By systematically discovering a reduced subspace of the state space, and carrying out calculations within this subspace, a subspace simulation can lead to large computational accelerations with minimal degradation of accuracy.
+Subspace methods, also known as model reduction, or reduced order methods, has a long history in engineering and applied mathematics, including applications to fluid simulation \cite{lumley1967}, and was introduced to the computer graphics literature in 1989 by Pentland and Williams \cite{Pentland:1989:GVM} \cite{Berkooz93theproper}. The basic principle of these methods, as the name suggests, is to reduce the computational complexity of a large numerical simulation. A typical simulation will have many degrees of freedom in principle, generating a vast state space of possibilities. However, in practice, not all of these degrees of freedom are of equal importance. By systematically discovering a reduced subspace of the state space, and carrying out calculations within this subspace, a subspace simulation can lead to large computational accelerations with minimal degradation of accuracy.
