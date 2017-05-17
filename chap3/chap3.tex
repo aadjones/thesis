@@ -1,7 +1,7 @@
 \chapter[Background]{Background}
 \section{Fluids}
 
-A {\em fluid}, formally speaking, is a substance that continuously deforms under the application of shear stress. \TODO{citation}. More intuitively, it is a substance that {\em flows}. Although colloquially we may use the term fluid to refer only to liquids, gases can exhibit flow, and are therefore considered to be fluids as well. (Indeed, the results demonstrated in this dissertation focus entirely on the turbulent flow of smoke.) The natural world is full of captivating fluid motions: ocean waves, ripples in a pond, clouds, the steam of a teakettle, etc. These flowing patterns, while beautiful, appear difficult to formalize precisely, and the modeling of fluids continues to be a mathematical and computational challenge to this day.
+A {\em fluid}, formally speaking, is a substance that continuously deforms under the application of shear stress. \todo{citation}. More intuitively, it is a substance that {\em flows}. Although colloquially we may use the term fluid to refer only to liquids, gases can exhibit flow, and are therefore considered to be fluids as well. (Indeed, the results demonstrated in this dissertation focus entirely on the turbulent flow of smoke.) The natural world is full of captivating fluid motions: ocean waves, ripples in a pond, clouds, the steam of a teakettle, etc. These flowing patterns, while beautiful, appear difficult to formalize precisely, and the modeling of fluids continues to be a mathematical and computational challenge to this day.
 
 \section{Physics-based modeling}
 The field of {\em fluid dynamics} in physics seeks to model and describe fluid flow systematically according to equations generated from a set of basic assumptions and principles. In order for continuous mathematical operators to be used to describe fluids, one of the basic assumptions is that of the {\em continuum}: for mathematical purposes, we assume that fluid velocity varies continuously across space, even though in reality, fluids are actually composed of discrete molecules. TBesides this continuum assumption, the various conservation laws of mass, energy, and momentum, imply the famous Navier-Stokes equations, which describe the velocity field $\uu$ of fluid flow depending on the intrinsic stress of viscosity and pressure. In the case where we make the additional simplifying assumption that the fluid is incompressible,\footnote{i.e., the fluid density does not vary within the flow field} the equations take the following form:
@@ -23,7 +23,7 @@ There are several terms here that must be unpacked:
 \item The time-varying scalar field $p = p(\xx, t)\ $ represents the pressure field of the fluid. 
 \item The time-varying vector field $\mathbf{f}_e = \mathbf{f}_e(\xx, t)$ represents any external forces affecting the fluid, such as gravity.
 \end{itemize}
-Equation \cite{eq:incompress} enforces the assumption of incompressibility, while equation \cite{eq:momentum} is a consequence of the aforementioned conservation laws.
+Equation \ref{eq:incompress} enforces the assumption of incompressibility, while equation \ref{eq:momentum} is a consequence of the aforementioned conservation laws.
 
 \section{Simulation}
 
@@ -41,11 +41,30 @@ We can connect these two viewpoints with the following equation:
 
 The left-hand side of equation \ref{eq:euler-lagrange} describes the velocity of the flow at position $\mathbf{r}$ and time $t$ using the Eulerian-specified velocity field $\uu$, while the right-hand side describes the same velocity by taking the partial derivative of the Lagrangian specified position field $\mathbf{X}$.
 
-Given an Eulerian-specified fluid velocity field $\uu(\xx, t)$ over a domain of space, and given another Eulerian-specified scalar field $\varphi(\xx, t)$ (e.g., temperature) over the same domain, we can consider the total derivative of $\phi$. By the chain rule, this expands as follows:
+Given an Eulerian-specified fluid velocity field $\uu(\xx, t)$ over a domain of space, and given another Eulerian-specified scalar field $\varphi(\xx, t)$ (e.g., temperature) over the same domain, we can consider the total derivative of $\varphi$. By the chain rule, this expands as follows:
 
 \begin{equation}
-\frac{d}{dt}\left(\xx, t\right) = \frac{\partial \varphi}{\partial t} + 
+\frac{\mathrm{d}}{\mathrm{d}t}\varphi\left(\xx, t\right) = \frac{\partial \varphi}{\partial t} + \dot{\xx} \cdot \nabla \varphi
 \end{equation}
 
 \section{Subspace Methods}
-Subspace methods, also known as model reduction, or reduced order methods, has a long history in engineering and applied mathematics, including applications to fluid simulation \cite{lumley1967}, and was introduced to the computer graphics literature in 1989 by Pentland and Williams \cite{Pentland:1989:GVM} \cite{Berkooz93theproper}. The basic principle of these methods, as the name suggests, is to reduce the computational complexity of a large numerical simulation. A typical simulation will have many degrees of freedom in principle, generating a vast state space of possibilities. However, in practice, not all of these degrees of freedom are of equal importance. By systematically discovering a reduced subspace of the state space, and carrying out calculations within this subspace, a subspace simulation can lead to large computational accelerations with minimal degradation of accuracy.
+Subspace methods, also known as model reduction, or reduced order methods, has a long history in engineering and applied mathematics, including applications to fluid simulation \cite{lumley1967}, and was introduced to the computer graphics literature in 1989 by Pentland and Williams \cite{Pentland:1989:GVM, Berkooz93theproper}. The basic principle of these methods, as the name suggests, is to reduce the computational complexity of a large numerical simulation. A typical simulation will have many degrees of freedom in principle, generating a vast state space of possibilities. However, in practice, not all of these degrees of freedom are of equal importance. By systematically discovering a reduced subspace of the state space, and carrying out calculations within this subspace, a subspace simulation can lead to large computational accelerations with minimal degradation of accuracy.
+
+\subsection{Modal Analysis}
+To see an example of the subspace method in action, consider the modeling of small deformations of rigid bodies. Although rigid bodies in principle have many degrees of freedom over which they can deform, they have certain characteristic shapes into which they are more likely to deform. These shapes, also known as {\em modes}, are the ones which minimize the strain, and in an intuitive sense are the ``natural'' deformations of the rigid body. To compute these, we assume the rigid body is discretized into a mesh with $N$ vertices. We then compute the system mass and stiffness matrices $\MM \in \R^{3N \times 3N}$ and $\KK \in \R^{3N \times 3N}$, respectively. The modes then satisfy the generalized eigenvalue equation
+
+\begin{equation}
+	\KK \xx = \lambda \MM \xx
+\end{equation}
+
+Due to the special properties of the matrices $\MM$ and $\KK$, which are both symmetric positive-definite (SPD), the eigenvalues $\lambda_j$ are positive real numbers. Although there are $3N$ eigenvalues in total, in practice, we can take a subset of them, $\lambda_1, \lambda_2, \dots, \lambda_r$, from least to greatest, and their associated eigenvectors $\psi_1, \psi_2, \dots, \psi_r$. Here, $r \ll 3N$ represents the number of modes we wish to retain. The $r$-dimensional subspace $S \subset \R^{3N}$ formed by the linear span of these eigenvectors can be encapsulated in matrix form by assembling the modal basis matrix $\UU \in \R^{3N \times r}$ as follows:
+
+
+\begin{align}
+	\UU &= \begin{pmatrix}
+	\vertbar & \vertbar &   & \vertbar \\
+	\psi_1 & \psi_2 & \dots & \psi_r   \\
+	\vertbar & \vertbar &   & \vertbar
+  \end{pmatrix}
+\end{align}
+
