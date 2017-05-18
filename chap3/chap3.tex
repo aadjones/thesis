@@ -57,14 +57,39 @@ To see an example of the subspace method in action, consider the modeling of sma
 	\KK \xx = \lambda \MM \xx
 \end{equation}
 
-Due to the special properties of the matrices $\MM$ and $\KK$, which are both symmetric positive-definite (SPD), the eigenvalues $\lambda_j$ are positive real numbers. Although there are $3N$ eigenvalues in total, in practice, we can take a subset of them, $\lambda_1, \lambda_2, \dots, \lambda_r$, from least to greatest, and their associated eigenvectors $\psi_1, \psi_2, \dots, \psi_r$. Here, $r \ll 3N$ represents the number of modes we wish to retain. The $r$-dimensional subspace $S \subset \R^{3N}$ formed by the linear span of these eigenvectors can be encapsulated in matrix form by assembling the modal basis matrix $\UU \in \R^{3N \times r}$ as follows:
-
+Due to the special properties of the matrices $\MM$ and $\KK$, which are both symmetric positive-definite (SPD), the eigenvalues $\lambda_i$ are positive real numbers. 
+Although there are $3N$ eigenvalues in total, in practice, we can take a subset of them, $\lambda_1, \lambda_2, \dots, \lambda_r$, from least to greatest, and their associated eigenvectors
+ $\psi_1, \psi_2, \dots, \psi_r$. (Here, $r \ll 3N$ represents the number of modes we wish to retain.) The eigenvectors $\psi_i$ we choose corresponding to the eigenvalues $\lambda_i$ 
+ are not unique; for convenience, we select those that satisfy the mass-orthogonality condition $\langle \MM \psi_i, \psi_j \rangle = \delta_{ij}$, where $\delta_{ij}$ is the Kronekcer delta, 
+ equaling $0$ for $i \neq j$ and $1$ for $i=j$. The $r$-dimensional subspace $S \subset \R^{3N}$ formed by the linear span of these eigenvectors can be encapsulated in matrix form 
+ by assembling the modal basis matrix $\UU \in \R^{3N \times r}$ as follows:
 
 \begin{align}
-	\UU &= \begin{pmatrix}
+	\UU^{T} &= \begin{pmatrix}
 	\vertbar & \vertbar &   & \vertbar \\
 	\psi_1 & \psi_2 & \dots & \psi_r   \\
 	\vertbar & \vertbar &   & \vertbar
   \end{pmatrix}
 \end{align}
 
+Thus, the mass-orthogonality condition we specified for the modes can be captured in the more succinct matrix form $\UU^{T} \MM \UU = \II_r$,
+where $\II_r \in \R^{r \times r}$ denotes the $r \times r$ identity matrix.
+
+Now consider the typical equation of motion, 
+\begin{equation}
+\MM \ddot{\xx} + \DD \dot{\xx} + \KK \xx = \ff
+\end{equation}
+
+We perform the substitution $\xx = \UU \qq$ for the appropriate choice $\qq \in S$, obtaining the following:
+
+\begin{equation}
+\MM {\UU \ddot{\qq}} + \DD {\UU \dot{\qq}} + \KK \UU \qq = \ff
+\end{equation}
+
+Next, we pre-multiply both sides by $\UU^{T}$:
+
+\begin{equation}
+\UU^{T} \MM \UU \ddot{\qq} + \UU^{T} \DD \UU \dot{\qq} + \UU^{T} \KK \UU \qq = \UU^{T} \ff
+\end{equation}
+
+By the mass-orthogonality condition, the term $\UU^{T} \MM \UU \ddot{\qq}$ reduces to $\II_r \ddot{\qq} = \ddot{\qq}$. 
