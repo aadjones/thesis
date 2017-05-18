@@ -47,6 +47,13 @@ Given an Eulerian-specified fluid velocity field $\uu(\xx, t)$ over a domain of 
 \frac{\mathrm{d}}{\mathrm{d}t}\varphi\left(\xx, t\right) = \frac{\partial \varphi}{\partial t} + \dot{\xx} \cdot \nabla \varphi
 \end{equation}
 
+The partial derivative term $\frac{\partial \varphi}{\partial t}$ indicates the instantaneous rate at which the temperature is changing with time, holding the spatial position constant. Thus, if we imagine a fluid flow being comprised of many infinitesimal particles, this term represents any change in temperature of a particle at a fixed spatial location. The remaining term $\dot{\xx} \cdot \nabla \varphi$ describes a more dynamic rate of change, as it incorporates changes in temperature caused by moving {\em along} the flow through the path $\dot{\xx}$. This movement is in the Lagrangian spirit of drifting along with the flow. In the case where $\dot{x}$ is taken to align with the flow velocity $\uu$, we have 
+
+\begin{equation}
+\frac{\mathrm{d}}{\mathrm{d}t}\varphi\left(\xx, t\right) = \frac{\partial \varphi}{\partial t} + \uu \cdot \nabla \varphi
+\end{equation}
+which is often called the {\em material derivative}. The operator $\uu \cdot \nabla$ is the advection operator, which we will be prominent later on.
+
 \section{Subspace Methods}
 Subspace methods, also known as model reduction, or reduced order methods, has a long history in engineering and applied mathematics, including applications to fluid simulation \cite{lumley1967}, and was introduced to the computer graphics literature in 1989 by Pentland and Williams \cite{Pentland:1989:GVM, Berkooz93theproper}. The basic principle of these methods, as the name suggests, is to reduce the computational complexity of a large numerical simulation. A typical simulation will have many degrees of freedom in principle, generating a vast state space of possibilities. However, in practice, not all of these degrees of freedom are of equal importance. By systematically discovering a reduced subspace of the state space, and carrying out calculations within this subspace, a subspace simulation can lead to large computational accelerations with minimal degradation of accuracy.
 
@@ -75,21 +82,46 @@ Although there are $3N$ eigenvalues in total, in practice, we can take a subset 
 Thus, the mass-orthogonality condition we specified for the modes can be captured in the more succinct matrix form $\UU^{T} \MM \UU = \II_r$,
 where $\II_r \in \R^{r \times r}$ denotes the $r \times r$ identity matrix.
 
-Now consider the typical equation of motion, 
+Now consider the typical equation of motion for undamped small deformations $\xx \in \R^{3N}$ corresponding to external forces $\ff \in \R^{3N}$: 
 \begin{equation}
-\MM \ddot{\xx} + \DD \dot{\xx} + \KK \xx = \ff
+\label{eq:mass-spring}
+\MM \ddot{\xx} + \KK \xx = \ff
 \end{equation}
 
-We perform the substitution $\xx = \UU \qq$ for the appropriate choice $\qq \in S$, obtaining the following:
+Equation \ref{eq:mass-spring}, is a very high-dimensional linear differential equation obtained by applying the standard equations of elastic deformation to the mesh with $3N$ nodes using the finite element method (FEM). For very fine meshes with large values of $N$, this equation may present a computational bottleneck. Hence, the approach of model reduction is welcome. We proceed by approximating $\xx$ as a linear combination of the modes $\psi_1, \dots, \psi_r$:
 
 \begin{equation}
-\MM {\UU \ddot{\qq}} + \DD {\UU \dot{\qq}} + \KK \UU \qq = \ff
+\xx \approx \UU \qq
 \end{equation}
-
-Next, we pre-multiply both sides by $\UU^{T}$:
+where the vector $\qq \in \R^{r}$ has components $q_i$ that are the corresponding weights of the associated modes $\psi_i$, $i=1,\dots,r$. This vector $\qq$ is called the {\em reduced coordinates} of $\xx$, and can also be thought of as the projection of $\xx$ into the subspace $S$. Rewriting equation \ref{eq:mass-spring}, we obtain
 
 \begin{equation}
-\UU^{T} \MM \UU \ddot{\qq} + \UU^{T} \DD \UU \dot{\qq} + \UU^{T} \KK \UU \qq = \UU^{T} \ff
+\MM {\UU \ddot{\qq}} + \KK \UU \qq = \ff
+\end{equation}
+By the generalized eigenvector condition, we have $\KK \UU = \Lambda \MM \UU$, where $\Lambda = \textnormal{diag}\left(\lambda_1, \dots, \lambda_r\right)$. Hence, we simplify as follows:
+
+\begin{equation}
+\MM \UU \left(\ddot{\qq} + \Lambda \qq\right) = \ff
+\end{equation}
+Next, to clear away the factor of $\MM \UU$, we pre-multiply both sides by $\UU^{T}$:
+
+\begin{equation}
+\UU^{T} \MM \UU \left(\ddot{\qq} + \Lambda \qq\right)= \UU^{T} \ff
+\end{equation}
+By the mass-orthogonality condition, the term $\UU^{T} \MM \UU$ reduces to $\II_r$.  On the right-hand-side, $\widetilde{\ff} = \UU^{T} \ff \in \R^r$ is the reduced form of $\ff$. Hence, we have the following lower-dimensional linear differential equation with unknown $\qq \in \R^{r}$:
+
+\begin{equation}
+\ddot{q} + \Lambda \qq = \widetilde{\ff}
+\end{equation}
+In this particular case, the system is uncoupled since $\Lambda$ is diagonal, so we have a collection of $r$ independent one-dimensional ordinary differential equations. These can be integrated forward in time very efficiently, obtaining $\qq_{t+1}$, the value of $\qq$ at the next time step. To finish the computation, we reconstruct into the full-dimensional space by computing $\xx_{t+1} = \UU \qq_{t+1}$.
+
+\subsection{Sound generation}
+Small rigid deformations of a solid body are precisely those that generate sound waves, so we briefly consider the application to audio of the previous discussion. Recall that our subspace reduction produces a collection of $r$ independent one-dimensional equations, which, expanded out, take the form
+
+\begin{equation}
+\label{eq:system}
+\ddot{q_i} + \lambda_i q_i = \psi_i^{T} f_i, \ \ i = 1, \dots, r
 \end{equation}
 
-By the mass-orthogonality condition, the term $\UU^{T} \MM \UU \ddot{\qq}$ reduces to $\II_r \ddot{\qq} = \ddot{\qq}$. 
+Recalling that each $\lambda_i$ is a positive real number, let $\omega_i$ be the positive square root $\omega_i = \sqrt{\lambda_i}$. Then the general analytical solution to the homogenous portion of each one-dimensional differential equation in \ref{eq:system} is given by $q_i = c_1 e^{i \omega_i t} + c_2 e^{i \omega_i t}$. In other words, we can think of the $i$-th mode as resonating at a natural frequency of $\omega_i$. This allows us to perform simple additive synthesis by mixing together a collection of sinusoids at the corresponding frequencies, generating the audio signal that corresponds to the physical deformation. The spirit of this basic approach motivates
+our sonification process in Chapter 5.
