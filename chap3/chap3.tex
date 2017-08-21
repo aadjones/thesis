@@ -1,4 +1,5 @@
 \chapter[Background]{Background}
+\label{chap:chap3}
 \section{Fluids}
 
 A {\em fluid}, formally speaking, is a substance that continuously deforms under the application of shear stress. \todo{citation}. More intuitively, it is a substance that {\em flows}. Although colloquially we may use the term fluid to refer only to liquids, gases can exhibit flow, and are therefore considered to be fluids as well. (Indeed, the results demonstrated in this dissertation focus entirely on the turbulent flow of smoke.) The natural world is full of captivating fluid motions: ocean waves, ripples in a pond, clouds, the steam of a teakettle, etc. These flowing patterns, while beautiful, appear difficult to formalize precisely, and the modeling of fluids continues to be a mathematical and computational challenge to this day.
@@ -124,4 +125,4 @@ Small rigid deformations of a solid body are precisely those that generate sound
 \end{equation}
 
 Recalling that each $\lambda_i$ is a positive real number, let $\omega_i$ be the positive square root $\omega_i = \sqrt{\lambda_i}$. Then the general analytical solution to the homogenous portion of each one-dimensional differential equation in \ref{eq:system} is given by $q_i = c_1 e^{i \omega_i t} + c_2 e^{i \omega_i t}$. In other words, we can think of the $i$-th mode as resonating at a natural frequency of $\omega_i$. This allows us to perform simple additive synthesis by mixing together a collection of sinusoids at the corresponding frequencies, generating the audio signal that corresponds to the physical deformation. The spirit of this basic approach motivates
-our sonification process in Chapter 5.
+our sonification process in Chapter \ref{chap:chap5}.
