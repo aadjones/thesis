@@ -16,7 +16,7 @@ In the earlier forms of sonification, the data itself tended to be the most prom
 
 \subsection{Model-Based Sonification}
 \label{sec:modelbased}
-As our particular research strategy resembles the category of model-based sonification the most closely, we review this technique in some detail.
+As our particular research strategy resembles the category of model-based sonification (MBS) the most closely, we review this technique in some detail.
 According to Hermann, ``Model-Based Sonification is a sonification technique that takes a
 particular look at how acoustic responses are generated in response to the user’s actions, and
 offers a framework to govern how these insights can be carried over to data sonification. As
@@ -30,8 +30,11 @@ a systematic way, and that are capable of evolving in time to generate an acoust
 	\item Sonic variability: Sonifications should vary according to subtle changes in state and input.
 	\item Information richness: Sonifications should be nontrivial.
 \end{itemize}
-Essentially, these properties gurantee that a sonification mimics interactions in the real world with data and sound. This ties in with a more analytical mode of listening---for instance, shaking a wrapped birthday present to try to determine its contents from the corresponding sound, rather than listening to the sound of the jostling present as a musical event.
+Essentially, these properties guarantee that a sonification mimics interactions in the real world with data and sound. This ties in with a more analytical mode of listening---for instance, shaking a wrapped birthday present to try to determine its contents from the corresponding sound, rather than listening to the sound of the jostling present as a musical event. By using the technique of MBS, Hermann concludes that these properties will in fact automatically be satisfied. The basic principle, thus, is to design something analogous to the laws of physics, but as a sonification system of data. The model then becomes the rules by which the data is mapped to the sound and unfolds over time, much as the laws of physics determine the rules by which objects interact with one another in space and time.
 
+Hermann also identifies six key components that aid in the design of a MBS system: setup, dynamics, excitation, initial state, link-variables, and listener characteristics. It is also useful to keep as separate abstract concepts the data space, in which the data lives; the model space, in which the sonification ```laws'' live; the sound space, in which the actual sound itself lives; and the listener space, in which the listener's reaction to the sound lives. The model setup, thus, takes data from the data space, and maps it to the space of a dynamical model with time-varying components that create the corresponding sound in the sound space. 
+
+As a general example, suppose that the data can be interpreted as a sequence of points in a $d$-dimensional space. Hence, we can consider it abstractly as a sequence $(\xx_j)$ of vectors living in the vector space $\R^d$.
 
 \subsection{Aesthetics}
 A continual dilemma in generative art is the conflict between the level of rigor of the underlying formal system and the human perception of its output. Some artists (e.g. Milton Babbitt) take the dogmatic position that the logic of the system trumps the general perception of the output. \cite{babbitt1958cares}  However, others such as K{\v{r}}enek have taken a more careful middle ground, arguing that the existence of an aesthetically coherent system of rules is no guarantee that an aesthetically coherent artistic result will perceptibly emerge: ``We cannot take the bare logical coherence of a musical `axiomatic' system as the sole criterion of its soundness! \dots The outstanding characteristic of music [is] its independence from the linguistic limitations of general logic.'' \cite{kvrenek1939music}
