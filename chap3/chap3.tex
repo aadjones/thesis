@@ -55,6 +55,42 @@ The partial derivative term $\frac{\partial \varphi}{\partial t}$ indicates the 
 \end{equation}
 which is often called the {\em material derivative}. The operator $\uu \cdot \nabla$ is the advection operator, which we will be prominent later on.
 
+\subsection{Numerical Simulation}
+Numerical simulation brings the abstract equations of mathematical simulation to a concrete, computational implementation. Typically, this involves discretization of any continuous parameters in the model, such as time and 
+space. As such, idealized concepts such as spatial and time-dependent derivatives must be approximated. Numerical analysis is a broad and rich field in applied mathematics and engineering, and many different approaches
+are available, each with various pluses and minuses. For the scope of this dissertation, we consider the numerical method of Jos Stam's {\em Stable Fluids} \cite{Stam99}, which is the backbone of our full-space fluid simulation technique. 
+
+The first step in Stam's method, following the technique of Chorin and Marsden \todo{citation}, is to devise a technique to combine the two equations \ref{eq:incompress} and \ref{eq:momentum} into one equation. We rely on a result from vector calculus called the Helmholtz-Hodge decomposition, which states that any arbitrary vector field $\ww$ can be decomposed uniquely into the sum of a divergence-free, or solenoidal, vector field and a curl-free, or irrotational, vector field. More precisely,
+we can write
+
+\begin{align}
+\label{eq:hh}
+\ww &= \uu_{\text{solenoidal}} + \uu_{\text{irrotational}}\\
+        &= \uu_{\text{solenoidal}} + \nabla q
+\end{align}
+since the curl $\nabla \times \nabla q$ must be zero for some scalar field $q$. Hence, we can define a projection operator $P$ which maps a vector field to its (unique) solenoidal component. In other words,
+$P \ww = \uu_{\text{solenoidal}}$. Indeed, this operator can be discovered explicitly by taking the divergence of both sides:
+
+\begin{equation}
+\nabla \cdot \ww = \nabla^2 q
+\end{equation}
+which is a Poisson equation for the scalar field $q$. Given $\ww$, we can solve this equation to obtain $q$, and then compute $\uu_{\text{solenoidal}}$ via $\uu_{\text{solenoidal}} = \ww - \nabla q$. Thus, we can take the
+second equation in the Navier-Stokes equations, \ref{eq:momentum}, and apply the projection operator $P$ to both sides, obtaining
+
+\begin{equation}
+\label{eq:stamns}
+\frac{\partial \uu}{\partial t} = P\left(-\left(\uu \cdot \nabla \right)\uu + \nu \nabla^{2}\uu + \mathbf{f}_e\right)
+\end{equation}
+This conveniently eliminates the pressure term $\nabla p$ and unites the two equations \ref{eq:incompress} and \ref{eq:momentum} into one.
+
+The next important technique that Stam's method uses involves {\em splitting} the operators in the Navier-Stokes equations \ref{eq:stamns} into a sequence of simpler operators. In other words, because the right-
+hand-side of \ref{eq:stamns} can be regarded as a combination of several terms (namely, an advection term, a diffusion term, an external forces term, and a projection) \ref{eq:splitting}, we focus our attention on solving each of these simpler differential equations in isolation. Once we have a solution to each individual term, we can construct an approximation for the solution to the more complex full equation \ref{eq:stamns}. 
+
+\begin{equation}
+\label{eq:splitting}
+\ww_0(\xx) \xrightarrow{\text{add forces}} \ww_1(\xx) \xrightarrow{\text{advect}} \ww_2(\xx) \xrightarrow{\text{diffuse}} \ww_3(\xx) \xrightarrow{\text{project}} \ww_4(\xx)
+\end{equation}
+ 
 \section{Subspace Methods}
 Subspace methods, also known as model reduction, or reduced order methods, has a long history in engineering and applied mathematics, including applications to fluid simulation \cite{lumley1967}, and was introduced to the computer graphics literature in 1989 by Pentland and Williams \cite{Pentland:1989:GVM, Berkooz93theproper}. The basic principle of these methods, as the name suggests, is to reduce the computational complexity of a large numerical simulation. A typical simulation will have many degrees of freedom in principle, generating a vast state space of possibilities. However, in practice, not all of these degrees of freedom are of equal importance. By systematically discovering a reduced subspace of the state space, and carrying out calculations within this subspace, a subspace simulation can lead to large computational accelerations with minimal degradation of accuracy.
 
@@ -126,3 +162,5 @@ Small rigid deformations of a solid body are precisely those that generate sound
 
 Recalling that each $\lambda_i$ is a positive real number, let $\omega_i$ be the positive square root $\omega_i = \sqrt{\lambda_i}$. Then the general analytical solution to the homogenous portion of each one-dimensional differential equation in \ref{eq:system} is given by $q_i = c_1 e^{i \omega_i t} + c_2 e^{i \omega_i t}$. In other words, we can think of the $i$-th mode as resonating at a natural frequency of $\omega_i$. This allows us to perform simple additive synthesis by mixing together a collection of sinusoids at the corresponding frequencies, generating the audio signal that corresponds to the physical deformation. The spirit of this basic approach motivates
 our sonification process in Chapter \ref{chap:chap5}.
+
+\subsection{A more general subspace formulation}
