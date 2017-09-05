@@ -96,6 +96,22 @@ $\ww_1(\xx) = \ww_0(\xx) + \Delta t \mathbf{f}_{\text{ext}}(\xx, t)$. The advect
 
 One of the key advantages to Stam's advection technique is that it is {\em unconditionally stable}: in other words, no matter how large a time step $\Delta t$ we select, the velocity will remain bounded. Intuitively, this is straightforward to observe: each velocity update is the result of an interpolation of previous velocity values, and therefore cannot be any greater than any of the previous values. From a practical standpoint, this numerical stability is a big plus; however, with very large time steps, the problem of numerical dissipation becomes more of an issue. A more detailed discussion of these issues can be found in \todo{citations}
 
+The remaining terms in the splitting are the diffusion and pressure projection. The diffusion equation is simply the heat equation, relying on the Laplace operator:
+
+\begin{equation}
+\frac{\partial{\ww_2}}{\partial{t}} = \nu \nabla^2 \ww_2
+\end{equation}
+
+Many well-known techniques exist for numerical solutions to this equation, including discretization of the Laplace operator as well as implict methods. \todo{citations}
+
+Finally, as observed previously, the pressure projection reduces to a Poisson equation to solve for $q$ from $\ww_3$.
+
+\begin{equation}
+\nabla^2 q = \nabla \cdot \ww_3
+\end{equation}
+
+From here, we can recover $\ww_4$ via the equation $\ww_4 = \ww_3 - \nabla q$. Hence, the numerical splitting is complete.
+
 Within Stam's paper is another interesting topic of carrying out the equations of motion within the Fourier domian. Although 
 we do not implement our solver using this technique, it is a topic of interest based on our compression technique as well as,
 our frequency-domain interpretation of the fluid modes and our corresponding sonification technique later on, so we delve into a few details here. The key observation is that the Fourier transform diagonalizes spatial derivatives. In other words, if we denote the Fourier transform of $\uu(\xx)$ by $\fancyF[\uu(\xx)](\kk) = \uhat(\kk)$, then we have $\fancyF[\nabla \uu(\xx)](\kk) = i \kk \uhat(\kk)$. The divergence operator similarly satisfies $\fancyF[\nabla \cdot \uu(\xx)](\kk) = i \kk \cdot \uhat(\kk)$, and the Laplacian, being the divergence of the gradient, satisfies $\fancyF[\nabla^2 \uu(\xx)](\kk) = - k^2 \uhat(\kk)$, where $k = |\kk|$. The upshot of all this is that we can view some of the fluid operators in the spatial domain in simple ways in the frequency domain. For example, the diffusion, based on the Laplacian operator, can be thought of as a low-pass filter with decay governed by the viscosity. In general, this mode of
@@ -105,6 +121,7 @@ thinking bears fruit later for our discussions of the compression algorithm in C
 Subspace methods, also known as model reduction, or reduced order methods, has a long history in engineering and applied mathematics, including applications to fluid simulation \cite{lumley1967}, and was introduced to the computer graphics literature in 1989 by Pentland and Williams \cite{Pentland:1989:GVM, Berkooz93theproper}. The basic principle of these methods, as the name suggests, is to reduce the computational complexity of a large numerical simulation. A typical simulation will have many degrees of freedom in principle, generating a vast state space of possibilities. However, in practice, not all of these degrees of freedom are of equal importance. By systematically discovering a reduced subspace of the state space, and carrying out calculations within this subspace, a subspace simulation can lead to large computational accelerations with minimal degradation of accuracy.
 
 \subsection{Modal Analysis}
+\label{sec:modal}
 To see an example of the subspace method in action, consider the modeling of small deformations of rigid bodies. Although rigid bodies in principle have many degrees of freedom over which they can deform, they have certain characteristic shapes into which they are more likely to deform. These shapes, also known as {\em modes}, are the ones which minimize the strain, and in an intuitive sense are the ``natural'' deformations of the rigid body. To compute these, we assume the rigid body is discretized into a mesh with $N$ vertices. We then compute the system mass and stiffness matrices $\MM \in \R^{3N \times 3N}$ and $\KK \in \R^{3N \times 3N}$, respectively. The modes then satisfy the generalized eigenvalue equation
 
 \begin{equation}
@@ -174,3 +191,39 @@ Recalling that each $\lambda_i$ is a positive real number, let $\omega_i$ be the
 our sonification process in Chapter \ref{chap:chap5}.
 
 \subsection{A more general subspace formulation}
+We have seen how subspace methods apply to rigid deformations, which can be characterized by linear systems. However, more general and complex phenomena, including fluid flow, require non-linear characterizations. Hence, we consider a more general framework for applying subspace methods, following Treuille 
+\cite{Treuille:2006:MRF}.
+
+In the most abstract setting, the subspace technique takes a vector $\uu \in \R^N$ living in a high-dimensional space and maps it to a corresponding reduced-space vector $\qq \in \R^r$, with $r \ll N$. This mapping can be seen as a projection operator $P : \R^N \rightarrow \R^r$, which carries $\uu$ to $\qq$, and its corresponding reconstruction operator $P^{-1} : \R^r \rightarrow \R^N$, which lifts $\qq$ back up to $\uu$. (Note that since $r < N$, the projection map $P$ is not one-to-one, and hence necessarily must lose some information.) 
+
+Within physical simulations, we are not concerned just with the projection mapping of one vector in the high space down to its corresponding reduced vector, but also a framework for time evolution. In other words, given a differential equation in the full space
+
+\begin{equation}
+\dot{\uu} = F(\uu, t)
+\end{equation}
+we would like to formulate a corresponding reduced-space differential equation
+
+\begin{equation}
+\dot{\qq} = \hat{F}(\qq, t)
+\end{equation}
+so that the equations of motion can be integrated through time within the reduced space. In particular, we desire a reduced-space differential equation 
+that can be solved in asymptotic time depending only on the reduced dimension $r$ and not the full dimension $N$.
+
+The obvious and standard approach is to compute $\hat{F}$ via what is known as {\em Galerkin projection} as follows:
+
+\begin{equation}
+\hat{F} = P \circ F \circ P^{-1}
+\end{equation}
+In the situation of linear equations, this projection as described before can be described with matrix-vector multiplies. In particular, the matrix corresponding
+to $\hat{F}$ can be precomputed, leading to large speedups. However, nonlinear dynamics must be handled with more sophisticated methods. Furthermore, in the absence of analytical eigenmodes, as utilized during section \S \ref{sec:modal}, it is unclear how to select a set of basis vectors to form a reasonable reduced space $\R^r$ in the first place. 
+
+Treuille's technique is to form a representative basis using ``snapshots'' from a corresponding full-space fluid simulation. Ideally, these snapshots capture the 
+user's desired range of motion and dynamics. Upon performing a form of Principal Component Analysis (PCA), a set of basis vectors $\qq_1, \dots, \qq_r$ are derived. Following the basic strategy of splitting the Navier-Stokes equations, it remains then to demonstrate how to perform reduced-space external forces,
+advection, diffusion, and projection. While most of these operations can be viewed as a full-space matrix, and thus projected and precomputed, the advection
+term, being nonlinear, requires a more careful approach. Although in principle, by discretizing the advection operator, a matrix corresponding
+to the advection term could be formulated, this matrix will depend on the current timestep, and thus cannot be precomputed like the others. To combat this issue,
+the original approach of Treuille is to construct a static third order tensor, which can be precomputed. However, as Kim and Delaney point out, this technique
+will not in general be a {\em consistent} integration method \cite{Kim2013, Carlberg11}. The intuition for this problem is that the finite difference methods in the reduced space do not play nicely with the semi-Lagrangian methods in the full-space, but further details are beyond the scope of this dissertation. However, the need for a different strategy for advection and other nonlinear phenomena motivates the notion of cubature schemes, described next.
+
+
+
