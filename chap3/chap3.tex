@@ -225,5 +225,15 @@ to the advection term could be formulated, this matrix will depend on the curren
 the original approach of Treuille is to construct a static third order tensor, which can be precomputed. However, as Kim and Delaney point out, this technique
 will not in general be a {\em consistent} integration method \cite{Kim2013, Carlberg11}. The intuition for this problem is that the finite difference methods in the reduced space do not play nicely with the semi-Lagrangian methods in the full-space, but further details are beyond the scope of this dissertation. However, the need for a different strategy for advection and other nonlinear phenomena motivates the notion of cubature schemes, described next.
 
+\subsection{Cubature schemes}
+The work of An et al. \cite{An:2008} brought the idea of cubature methods to nonlinear solid mechanics. The term cubature itself is a multidimensional analogue
+of the classical one-dimensional problem of {\em quadrature}, which seeks to approximate the definite integral of a function by estimating it as a weighted 
+sum of point-sampled versions of the function. More concretely, we have an approximation of the form
+
+\begin{equation}
+\int_a^b f(x) dx \approx \sum_{i=1}^n w_i f(x_i)
+\end{equation}
+where the $w_i$ are weights and the $x_i$ are the point samples. Careful choice of these weights and point samples leads to efficient and accurate estimation of the integral.
+
 
 
