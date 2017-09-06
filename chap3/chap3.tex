@@ -235,5 +235,29 @@ sum of point-sampled versions of the function. More concretely, we have an appro
 \end{equation}
 where the $w_i$ are weights and the $x_i$ are the point samples. Careful choice of these weights and point samples leads to efficient and accurate estimation of the integral.
 
+In the more general setting, following Kim and Delaney \cite{Kim2013}, we introduce some standard notation. Suppose our full space is $\R^{3N}$ and our subspace is $\R^{r}$, so that our subspace 
+projection matrix is $\UU \in \R^{3N} \times r$. Furthermore, we denote reduced-space quantities with an over-tilde, e.g., $\tilde{\uu} = \UU^T u \in \R^{r}$ denotes the projection by $\UU$ of $\uu$ in the full space 
+down to $\tilde{\uu}$ in the reduced space. Next, suppose we have a (possibly nonlinear) function $\fancyF : \R^3 \rightarrow \R^3$ and a vector of $N$ points in $\R^3$, $\xx \in \R^{3N}$ that represents
+a velocity field on a grid. Since $\fancyF$ can operate on any point $p \in \R^3$, we can transform the entire vector $\xx$ pointwise by having $\fancyF$ operate on each of its points. This
+yields a corresponding vector $\mathbf{f} \in \R^{3N}$ that represents $\xx$ pointwise transformed by $\fancyF$. (Although the discussion here is generic to what $\fancyF$ represents, to give a concrete
+example, $\xx$ could be a velocity field prior to advection, $\fancyF$ could be an advection scheme, and $\mathbf{f}$ could be the resulting velocity field after advection.)
+
+In the full space, we have a mapping from $\xx$ to $\mathbf{f}$ via $\fancyF$, so in order for the subspace technique to work, we need to discover a mapping from $\tilde{\xx}$ to $\tilde{\mathbf{f}}$. 
+The simplest cases are when $\fancyF$ itself is a linear transformation, so that its projection can be precomputed, but in the nonlinear case, as discussed previously, we need another strategy.
+Observe first that if we are willing to calculate with full-space coordinates, we can write
+
+\begin{equation}
+\label{eq:fulladvect}
+\tilde{\mathbf{f}} = \UU^T \mathbf{f} = \UU^T \fancyF \xx = \UU^T \fancyF(\UU\tilde{\xx})
+\end{equation}
+which implies a method from computing $\tilde{\mathbf{f}}$ starting from $\tilde{\xx}$ by reconstructing first into the full space via $\UU$, applying $\fancyF$, and then projecting back
+down into the subspace. This method, however, is counter to the spirit of the subspace approach, as it depends on the dimension of the full space, $N$. The insight of Kim and Delaney is to regard
+Equation \ref{eq:fulladvect} as a multidimensional integral over the entire simulation domain $\Omega$:
+
+\begin{equation}
+\label{eq:integral}
+\tilde{\mathbf{f}} = \UU^T \fancyF(\UU\tilde{\xx}) = \int_{\Omega} \UU_p^T \fancyF(\UU_p \tilde{\xx})d\Omega
+\end{equation}
+
 
 
