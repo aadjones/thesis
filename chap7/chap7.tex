@@ -1,6 +1,61 @@
 \chapter[Conclusions and future work]{Conclusions and future work}
 \label{chap:chap7}
 
-\section{Summary of Results}
+In this dissertation, toward the goal of developing a generative audiovisual compositional language, we have presented a sonification system for computational fluid dynamics
+based on the method of subspaces. Additionally, we have devised a data compression algorithm that alleviates the memory costs of subspace algorithms by an order of magnitude. Through
+systematic experimentation and exploration, our sonification system was tested and explored, producing a series of audiovisual etudes. The data compression algorithm was rigorously tested 
+on a variety of different types of scenes, perturbations, and compression levels, demonstrating its general robustness and effectiveness. Continuing research in the direction of the sonification
+system is an important step in the development of new audiovisual grammars in media art, while further work in the area of data compression represents an important step toward
+making subspace simulations more computationally practical.
+
+ \section{Summary of Results}
+ We have devised a system of sonification of computational fluid dynamics by considering the empirical eigenvectors and eigenvalues of a subspace simulation. Based loosely on the ideas of 
+ Chladni plates and the general phenomenon of cymatics, we map the characteristic resonant modal shapes of the fluid velocity field bases to their corresponding audio frequencies,
+ producing a sound signal. The choice of a model-based sonification strategy allows us to unfold our visuals and sounds easily over time within the framework of the system. Hence, the natural
+ sequence of fluid velocity fields as governed by the subspace Navier-Stokes equations determines a natural time progression of dynamic visual forms and sonic content. 
+ 
+ Several sound synthesis strategies and transformations had to be considered. We carefully mapped the raw singular values into frequencies,
+ choosing an intuitive polarization as well as a ratio-preserving transformation and offset to keep the values within the limits of human hearing. Following the spirit of physical modal vibrations, we 
+ selected a subtractive synthesis technique, in which a filterbank of resonant filters at the corresponding modal frequencies were excited in various strengths and decay times. Although many possible
+ input signals could be used with the filter bank, we chose to use noise, as it was both spectrally rich and matched the aesthetic feel of fluid flow.
+
+Our audiovisual etudes each explored different combinations of modal excitations. By isolating individual modes, superimposing them, and cross-fading between them, we demonstrated
+the versatility and compositional usefulness of having spectral control in both the spatial and audio domain. The gestures of crescendo and diminuendo were also performed by controlling the
+overall energy of the system, demonstrating the potential for different musical articulations. Finally, the general principle of constructing time-evolving paths ungoverned by physics illustrated
+an important compositional possibility of working with fluids and sounds more fancifully, leading to the idea of smoke ``as it might be'' as opposed to smoke ``as it is.'' 
+
+The data compression technique developed in Chapter \ref{chap:chap4} serves to alleviate the memory pressure of subspace simulations. In an analogy to the JPEG compression scheme,
+we use a DCT-based transform compression algorithm to represent the subspace basis vectors in the Fourier domain, with the intuition that the energy at the higher frequencies can be 
+dampened or discarded without distorting the original data greatly. Our algorithm, while intuitively based on JPEG, made several important alterations that were necessary for fluid data, including
+adapting the process to three dimensions, systematically generating damping quality matrices, performing an energy-based per-block quality selection, and devising a new zigzag scan. In addition, 
+since na\"ive reconstruction during the decompression stage required heavy computational costs, largely negating the advantage of the subspace approach to begin with, we discovered a novel 
+fast sparse frequency-domain reconstruction, enabling the algorithm to reduce memory costs without severely increasing time costs.
+
 \section{Limitations}
+There are several drawbacks to our current sonification and audiovisual system. The most challenging is that of computational speed. While such a system would ideally run in real time,
+allowing not only for simple compositional feedback and iteration but also for user interaction, both the simulation and rendering times as of 2017 are extremely far away from these speeds.
+This means that even short compositions can take hours or days to generate at high visual quality. However, the restriction of working in non-real time does force the composer to make careful
+compositional choices ahead of time, producing aesthetically very different works from real-time, experimental, interactive systems. 
+
+Another basic drawback of the sonification system is inherent in the subspace method itself. Once a training set is chosen and the subspace basis is computed, simulations are locked into 
+reproducing only dynamics that are reasonably similar to the original training set. Hence, if the user desires any significantly different set of motions or dynamics, a fresh simulation must be precomputed.
+While in principle this can be done repeatedly, the time costs are quite prohibitive. A more analytical approach such as using a particular mathematical basis such as Laplacian eigenfunctions is possible,
+but the fluid modes would then be more regular, undermining the visual variety of the training-based approach.
+
+The data compression scheme, while obtaining an order of magnitude compression, still leads to a slight increase in time costs, which may be unacceptable to a user who already
+has sufficient memory to compute the uncompressed subspaces. Furthermore, the system assumes a fluid simulation technique using a regular grid, making it unusable for tetrahedral meshes or other
+more general fluid simulation methods.
+
 \section{Future Work}
+We have explored several basic parameter modulations in our sonification system, producing a series of audiovisual etudes. However, further work in this direction could be considered. Other
+parameters such as fluid viscosity or buoyant forces could be modulated, leading to new insights into the interplay between form and sound. The sonifications presented
+in this dissertation all derived from one particular subspace training; however, other data sets are possible to generate, leading to different audiovisual links. The introduction
+of obstacles would also perturb the basis functions, leading to a novel spectrum. The present rendering system remains static, presenting the smoke in each simulation
+with the same lighting and coloring; however, a mapping between the rendering system and sound could also be explored, yielding more variety in the visuals. Finally, more complete audiovisual works,
+deeper in macrostructure and musical form, remain to be seen. 
+
+In the data compression scheme, no matter what the simulation, the approach relies on using the discrete cosine basis, not leveraging the potential for more sparse representations depending
+on the simulation at hand. More general techniques, such as dictionary-based methods using orthogonal matching pursuit, could lead to sparser representations, and therefore both better memory compression
+as well as time reduction, due to the reliance of the algorithm on the sparse frequency-domain reconstruction during the decompression phase. Additionally, besides the run-length encoding step, no further
+lossless compression is applied to the data stream during the compressor. However, preliminary tests show that the data stream typically contains informational redundancies, implying that an additional step through
+entropy encoding such as Huffman or arithmetic coding could increase the compression efficiency.
