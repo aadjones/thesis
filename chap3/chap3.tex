@@ -259,5 +259,15 @@ Equation \ref{eq:fulladvect} as a multidimensional integral over the entire simu
 \tilde{\mathbf{f}} = \UU^T \fancyF(\UU\tilde{\xx}) = \int_{\Omega} \UU_p^T \fancyF(\UU_p \tilde{\xx})d\Omega
 \end{equation}
 
+Now in integral, we can therefore apply the method of cubature \cite{Press:1992:NumRecipes} to obtain an efficient approximation of $\tilde{\mathbf{f}}$. In particular, we would like to select a set
+$\mathcal{C}$ of points $p \in \mathcal{C}$ and corresponding weights $w_p \in \R$ so that we have
 
+\begin{equation}
+\label{eq:integral}
+\tilde{\mathbf{f}} = \int_{\Omega} \UU_p^T \fancyF(\UU_p \tilde{\xx})d\Omega \approx \sum_{p \in \mathcal{C}} w_p \UU_p^T \fancyF(\UU_p \tilde{\xx})
+\end{equation}
+Provided that the cardinality $|\mathcal{C}|$ is on the order of the reduced space-dimension $r$ rather than the full-space dimension $N$, this approach will pay dividends. However, it remains to see
+how to select both the cubature set $\mathcal{C}$ and the weights $w_p$. 
+
+The original approach by An is to select a set of cubature points and corresponding weights that minimize the error of a training set.
 
