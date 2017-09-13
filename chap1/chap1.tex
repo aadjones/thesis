@@ -10,6 +10,19 @@ In the visual arts, more powerful computing and research into computer graphics 
 
 The experiment of Ernst Chladni (1756--1827), involving the patterns of sand accumulating on the surface of vibrating metal plates, was an early audiovisual link between visual shape and sonic frequency. Using a violin bow to vibrationally excite a metal plate covered with sand, Chladni observed a variety of intriguing nodal patterns, depending on the shape of the plate as well as the frequency of the vibration. The Swiss scientist Hans Jenny (1904--1972) pioneered the general study of this principle of visual patterns associated with sonic vibrations, which he named ``Cymatics.'' 
 
+\section{Systems of Sonification and Aesthetic Goals}
+The term ``sonification'' has many subtly different interpretations and definitions, but we use it in this dissertation to refer broadly to the association of data to sound. Scientifically-focused sonifications can reveal underlying
+qualitative patterns of the data, while artistic-focused sonifications can serve as a framework for composing novel musical or even audiovisual works. In this dissertation, we use the phenomenon of fluid dynamics as our
+data, focusing on a system of sonification that, while revealing certain qualitative features of the fluid motion, mostly serves to generate novel audiovisual pieces. More precisely, we use the the {\em subspace} method of simulation, based on a stable computational fluid dynamics simulation, as our data, and a model-based sonification system to associate the data with musical sound. 
+
+\section{Data Compression and Memory Obstacles with Subspace Matrices}
+The general technique of data compression began with Claude Shannon and the field of information theory. It is of practical relevance for many problems in computing, as reducing memory footprints
+can make certain simulations more feasible to run. The general idea of data compression is that by exploiting patterns or redundancies in data, we can often represent the same data in a more terse form.
+A wide variety of research in this area has produced many successful compression schemes, from lossless compression of arbitrary files (ZIP) to lossy compression of image (JPEG), audio (MP3), and video (MPEG).
+
+The subspace method of simulation, while known to achieve large speedups over regular full-space simulations, also requires a potentially prohibitive memory cost, consuming dozens of gigabytes of RAM 
+in high-resolution, three-dimensional simulations. While other research has been done on compressing blendshape matrices for facial animations and eigenmode matrices for modal sound synthesis,
+to our knowledge, no previous work on compressing fluid subspace matrices has been done.
 
 \section{Thesis Statement and Main Results}
 The thesis statement is as follows:
