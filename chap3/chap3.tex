@@ -238,7 +238,7 @@ where the $w_i$ are weights and the $x_i$ are the point samples. Careful choice 
 In the more general setting, following Kim and Delaney \cite{Kim2013}, we introduce some standard notation. Suppose our full space is $\R^{3N}$ and our subspace is $\R^{r}$, so that our subspace 
 projection matrix is $\UU \in \R^{3N} \times r$. Furthermore, we denote reduced-space quantities with an over-tilde, e.g., $\tilde{\uu} = \UU^T u \in \R^{r}$ denotes the projection by $\UU$ of $\uu$ in the full space 
 down to $\tilde{\uu}$ in the reduced space. Next, suppose we have a (possibly nonlinear) function $\fancyF : \R^3 \rightarrow \R^3$ and a vector of $N$ points in $\R^3$, $\xx \in \R^{3N}$ that represents
-a velocity field on a grid. Since $\fancyF$ can operate on any point $p \in \R^3$, we can transform the entire vector $\xx$ pointwise by having $\fancyF$ operate on each of its points. This
+a velocity field on a grid. Since $\fancyF$ can operate on any point $p \in \R^3$, we can transform the entire vector $\xx$ pointwise by having $\fancyF$ operate on each of its points, at each stage computing $\ff_p = \fancyF_p(\xx_p) \in \R^3$. This
 yields a corresponding vector $\mathbf{f} \in \R^{3N}$ that represents $\xx$ pointwise transformed by $\fancyF$. (Although the discussion here is generic to what $\fancyF$ represents, to give a concrete
 example, $\xx$ could be a velocity field prior to advection, $\fancyF$ could be an advection scheme, and $\mathbf{f}$ could be the resulting velocity field after advection.)
 
@@ -256,7 +256,7 @@ Equation \ref{eq:fulladvect} as a multidimensional integral over the entire simu
 
 \begin{equation}
 \label{eq:integral}
-\tilde{\mathbf{f}} = \UU^T \fancyF(\UU\tilde{\xx}) = \int_{\Omega} \UU_p^T \fancyF(\UU_p \tilde{\xx})d\Omega
+\tilde{\mathbf{f}} = \UU^T \fancyF(\UU\tilde{\xx}) = \int_{\Omega} \UU_p^T \fancyF_p(\UU_p \tilde{\xx})d\Omega
 \end{equation}
 
 Now in integral, we can therefore apply the method of cubature \cite{Press:1992:NumRecipes} to obtain an efficient approximation of $\tilde{\mathbf{f}}$. In particular, we would like to select a set
@@ -269,5 +269,32 @@ $\mathcal{C}$ of points $p \in \mathcal{C}$ and corresponding weights $w_p \in \
 Provided that the cardinality $|\mathcal{C}|$ is on the order of the reduced space-dimension $r$ rather than the full-space dimension $N$, this approach will pay dividends. However, it remains to see
 how to select both the cubature set $\mathcal{C}$ and the weights $w_p$. 
 
-The original approach by An is to select a set of cubature points and corresponding weights that minimize the error of a training set.
+The original approach by An is to select a set of cubature points and corresponding weights that minimize the error of a training set. First, we describe the method of choosing weights,
+given a particular set of cubature points. To that end, suppose we have a collection of $T$ snapshots, $\ff^1, \dots, \ff^T$, and
+their associated reduced-space projections $\tildef^1, \dots, \tildef^T$, where $\tildef^i = \UU^T\ff^i$. In addition, suppose we have selected a collection of $n$ cubature points. Then we look to solve the
+following nonnegative least squares (NNLS) problem:
 
+\begin{equation}
+\begin{bmatrix}
+    \tildef_{1}^1       & \cdots & \tildef_{i}^{1} & \cdots & \tildef_{n}^1\\
+    \vdots                 &              & \vdots            &             & \vdots\\
+    \tildef_{1}^{t}     & \cdots  & \tildef_{i}^{t} & \cdots  & \tildef_{n}^t\\
+    \vdots                 &              & \vdots            &             & \vdots\\
+    \tildef_{1}^T      & \cdots   & \tildef_{n}^T & \cdots & \tildef_n^T
+\end{bmatrix}
+\begin{bmatrix}
+	w_1\\
+	\vdots\\
+	w_n
+\end{bmatrix}
+=
+\begin{bmatrix}
+	\tildef^1\\
+	\vdots\\
+	\tildef^t\\
+	\vdots\\
+	\tildef^T
+\end{bmatrix}
+\end{equation}
+
+with the unknown weight vector $\mathbf{w}$ satisfying $\mathbf{w} \geq \mathbf{0}$. 
