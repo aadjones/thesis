@@ -334,6 +334,14 @@ This approach provides a custom quantization matrix for each block while maintai
 \label{fig:zigzag3d}
 \end{figure}
 
+A compression method that reduces the size of $\UU$ is most useful if it efficiently supports at least three different operations:
+\begin{itemize}
+\item \textbf{Projection:} The time needed to compute the full $\UU^T \uu = \utilde$ matrix-vector product should not prohibitively increase due to the presence of a decompressor.
+\item \textbf{Dense reconstruction:} Conversely, $\UU \utilde = \uu$ must also be fast.
+\item \textbf{Batched random access:} In order to support sparse reconstruction, it should be possible to query the velocity field at a set of random points on the simulation grid. In addition to efficient sparse reconstruction, this feature is also needed to support certain types of time integration, e.g.~cubature-based semi-Lagrangian schemes \cite{Kim2013}.
+\end{itemize}
+With these requirements in mind, we can design our codec, which we present in the next section.
+
 \subsection{Subspace Decompression}
 \label{sec:decompress}
 
