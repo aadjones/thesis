@@ -326,3 +326,15 @@ the desired tolerance $\epsilon$.
 \EndFunction
 \end{algorithmic}
 \end{algorithm}
+
+\begin{algorithm}
+\caption{Importance Sampled Cubature Selection}
+\begin{algorithmic}[1]
+\Function{ImportanceSampledCubature}{$C$}
+\While {$C$ points have not been added to $\fancyS$}
+\State {Randomly select a candidate $p \notin \fancyS$}
+\State {Add $p$ to $\fancyS$ with probability $\text{PDF}(p)$}
+\EndWhile
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
