@@ -2,10 +2,10 @@
 \label{chap:chap3}
 \section{Fluids}
 
-A {\em fluid}, formally speaking, is a substance that continuously deforms under the application of shear stress. \todo{citation}. More intuitively, it is a substance that {\em flows}. Although colloquially we may use the term fluid to refer only to liquids, gases can exhibit flow, and are therefore considered to be fluids as well. (Indeed, the results demonstrated in this dissertation focus entirely on the turbulent flow of smoke.) The natural world is full of captivating fluid motions: ocean waves, ripples in a pond, clouds, the steam of a teakettle, etc. These flowing patterns, while beautiful, appear difficult to formalize precisely, and the modeling of fluids continues to be a mathematical and computational challenge to this day.
+A {\em fluid}, formally speaking, is a substance that continuously deforms under the application of shear stress \cite{batchelor2000introduction}. More intuitively, it is a substance that {\em flows}. Although colloquially we may use the term fluid to refer only to liquids, gases can exhibit flow, and are therefore considered to be fluids as well. (Indeed, the results demonstrated in this dissertation focus entirely on the turbulent flow of smoke.) The natural world is full of captivating fluid motions: ocean waves, ripples in a pond, clouds, the steam of a teakettle, etc. These flowing patterns, while beautiful, appear difficult to formalize precisely, and the modeling of fluids continues to be a mathematical and computational challenge to this day.
 
 \section{Physics-based modeling}
-The field of {\em fluid dynamics} in physics seeks to model and describe fluid flow systematically according to equations generated from a set of basic assumptions and principles. In order for continuous mathematical operators to be used to describe fluids, one of the basic assumptions is that of the {\em continuum}: for mathematical purposes, we assume that fluid velocity varies continuously across space, even though in reality, fluids are actually composed of discrete molecules. TBesides this continuum assumption, the various conservation laws of mass, energy, and momentum, imply the famous Navier-Stokes equations, which describe the velocity field $\uu$ of fluid flow depending on the intrinsic stress of viscosity and pressure. In the case where we make the additional simplifying assumption that the fluid is incompressible,\footnote{i.e., the fluid density does not vary within the flow field} the equations take the following form:
+The field of {\em fluid dynamics} in physics seeks to model and describe fluid flow systematically according to equations generated from a set of basic assumptions and principles. In order for continuous mathematical operators to be used to describe fluids, one of the basic assumptions is that of the {\em continuum}: for mathematical purposes, we assume that fluid velocity varies continuously across space, even though in reality, fluids are actually composed of discrete molecules. Besides this continuum assumption, the various conservation laws of mass, energy, and momentum, imply the famous Navier-Stokes equations \cite{currie2012fundamental}, which describe the velocity field $\uu$ of fluid flow depending on the intrinsic stress of viscosity and pressure. In the case where we make the additional simplifying assumption that the fluid is incompressible,\footnote{i.e., the fluid density does not vary within the flow field} the equations take the following form:
 
 \begin{equation}
 \label{eq:incompress}
@@ -28,13 +28,13 @@ Equation \ref{eq:incompress} enforces the assumption of incompressibility, while
 
 \section{Simulation}
 
-Simulation is, of course, the imitation of a natural process, in this case over time. Any simulation must first determine a technique of modeling the process computationally, and there are often many different possible strategies. We consider here a few typical approaches in computational fluid dynamics.
+Simulation is the imitation of a natural process, in this case over time. Any simulation must first determine a technique of modeling the process computationally, and there are often many different possible strategies. We consider here a few typical approaches in computational fluid dynamics.
 
 One of the most direct ways of modeling fluids is to discretize both the spatial and time domain. In other words, to perform the calculations, we dice up the region of space into a regular grid of small cubical cells. Each cell then contains a vector, or arrow, describing the velocity of the fluid at the position in space. In order to evolve the motion of the flow over time, we also dice up time itself into a sequence of discrete time steps, computing how the velocity of the fluid in each cell changes at each time step. This approach is called the {\em Eulerian} viewpoint of the flow. Intuitively, this can be thought of as staying in a fixed location and observing the flow through that particular location. More precisely, the fluid's velocity in this viewpoint is represented as $\uu(\xx, t)$, which gives the velocity of the fluid at each spatial location $\xx$ and time $t$.
 
 In contrast, the {\em Lagrangian} viewpoint of the flow takes the point of view of each individual fluid particle as it moves along the flow through space and time. Intuitively, this can be thought of drifting along with the flow. If we label each particle based on its position in space using a vector field $\mathbf{r}$, we then describe the fluid flow with the position field $\mathbf{X}(\mathbf{r}, t)$ , which gives the position of each particle labeled by $\mathbf{r}$ at time $t$.
 
-We can connect these two viewpoints with the following equation:
+Following \cite{lamb1932hydrodynamics}, we can connect these two viewpoints with the following equation:
 \begin{equation}
 \label{eq:euler-lagrange}
 \uu\left(\mathbf{X}\left(\mathbf{r}, t\right)\right) = \frac{\partial \mathbf{X}}{\partial t}\left(\mathbf{r}, t\right)
@@ -60,7 +60,7 @@ Numerical simulation brings the abstract equations of mathematical simulation to
 space. As such, idealized concepts such as spatial and time-dependent derivatives must be approximated. Numerical analysis is a broad and rich field in applied mathematics and engineering, and many different approaches
 are available, each with various pluses and minuses. For the scope of this dissertation, we consider the numerical method of Jos Stam's {\em Stable Fluids} \cite{Stam99}, which is the backbone of our full-space fluid simulation technique. 
 
-The first step in Stam's method, following the technique of Chorin and Marsden \todo{citation}, is to devise a technique to combine the two equations \ref{eq:incompress} and \ref{eq:momentum} into one equation. We rely on a result from vector calculus called the Helmholtz-Hodge decomposition, which states that any arbitrary vector field $\ww$ can be decomposed uniquely into the sum of a divergence-free, or solenoidal, vector field and a curl-free, or irrotational, vector field. More precisely,
+The first step in Stam's method, following the technique of Chorin and Marsden in \cite{chorin1990mathematical}, is to devise a technique to combine the two equations \ref{eq:incompress} and \ref{eq:momentum} into one equation. We rely on a result from vector calculus called the Helmholtz-Hodge decomposition, which states that any arbitrary vector field $\ww$ can be decomposed uniquely into the sum of a divergence-free, or solenoidal, vector field and a curl-free, or irrotational, vector field. More precisely,
 we can write
 
 \begin{align}
@@ -94,15 +94,15 @@ hand-side of \ref{eq:stamns} can be regarded as a combination of several terms (
 The external forces can be approximated simply using forward Euler or other explicit schemes. In other words, we can write
 $\ww_1(\xx) = \ww_0(\xx) + \Delta t \mathbf{f}_{\text{ext}}(\xx, t)$. The advection term, however, is nonlinear and adds considerable complexity to the solution. Stam's insight was to consider the advection from a Lagrangian viewpoint. Intuitively speaking, each fluid particle is advected by its own velocity. Hence, to calculate the velocity at a particular spatial point $\xx$ at the next time step $t + \Delta t$, we backtrace from the point $\xx$ through the previous velocity field over a time step of $\Delta t$. Letting $\xx$ vary, following Stam's notation, this defines a path $\mathbf{p}(\xx, s)$ along a partial streamline of the velocity field. We assume then that the new velocity at the point $\xx$ at time $t + \Delta t$ must therefore be the same as the old velocity at the backtraced point at time $\Delta t$ previous. (Although the backtraced point may not lie exactly on a grid cell, we can use linear interpolation to reslve this problem.) More concretely, we have $\ww_2(\xx) = \text{Interpolate}\left(\ww_1\left(\mathbf{p}(\xx, -\Delta t)\right)\right)$.
 
-One of the key advantages to Stam's advection technique is that it is {\em unconditionally stable}: in other words, no matter how large a time step $\Delta t$ we select, the velocity will remain bounded. Intuitively, this is straightforward to observe: each velocity update is the result of an interpolation of previous velocity values, and therefore cannot be any greater than any of the previous values. From a practical standpoint, this numerical stability is a big plus; however, with very large time steps, the problem of numerical dissipation becomes more of an issue. A more detailed discussion of these issues can be found in \todo{citations}
+One of the key advantages to Stam's advection technique is that it is {\em unconditionally stable}: in other words, no matter how large a time step $\Delta t$ we select, the velocity will remain bounded. Intuitively, this is straightforward to observe: each velocity update is the result of an interpolation of previous velocity values, and therefore cannot be any greater than any of the previous values. From a practical standpoint, this numerical stability is a big plus; however, with very large time steps, the problem of numerical dissipation becomes more of an issue. A more detailed discussion of these issues can be found in \cite{bridson2015fluid}.
 
-The remaining terms in the splitting are the diffusion and pressure projection. The diffusion equation is simply the heat equation, relying on the Laplace operator:
+The remaining terms in the splitting are the diffusion and pressure projection. The diffusion term is simply the heat equation, relying on the Laplace operator:
 
 \begin{equation}
 \frac{\partial{\ww_2}}{\partial{t}} = \nu \nabla^2 \ww_2
 \end{equation}
 
-Many well-known techniques exist for numerical solutions to this equation, including discretization of the Laplace operator as well as implict methods. \todo{citations}
+Many well-known techniques exist for numerical solutions to this equation, including discretization of the Laplace operator as well as implicit methods \cite{peaceman1955numerical}.
 
 Finally, as observed previously, the pressure projection reduces to a Poisson equation to solve for $q$ from $\ww_3$.
 
@@ -260,14 +260,14 @@ Equation \ref{eq:fulladvect} as a multidimensional integral over the entire simu
 \end{equation}
 
 Now in integral, we can therefore apply the method of cubature \cite{Press:1992:NumRecipes} to obtain an efficient approximation of $\tilde{\mathbf{f}}$. In particular, we would like to select a set
-$\mathcal{C}$ of points $p \in \mathcal{C}$ and corresponding weights $w_p \in \R$ so that we have
+$\mathcal{S}$ of points $p \in \mathcal{S}$ and corresponding weights $w_p \in \R$ so that we have
 
 \begin{equation}
 \label{eq:integral}
-\tilde{\mathbf{f}} = \int_{\Omega} \UU_p^T \fancyF(\UU_p \tilde{\xx})d\Omega \approx \sum_{p \in \mathcal{C}} w_p \UU_p^T \fancyF(\UU_p \tilde{\xx})
+\tilde{\mathbf{f}} = \int_{\Omega} \UU_p^T \fancyF(\UU_p \tilde{\xx})d\Omega \approx \sum_{p \in \mathcal{S}} w_p \UU_p^T \fancyF(\UU_p \tilde{\xx})
 \end{equation}
-Provided that the cardinality $|\mathcal{C}|$ is on the order of the reduced space-dimension $r$ rather than the full-space dimension $N$, this approach will pay dividends. However, it remains to see
-how to select both the cubature set $\mathcal{C}$ and the weights $w_p$. 
+Provided that the cardinality $|\mathcal{S}|$ is on the order of the reduced space-dimension $r$ rather than the full-space dimension $N$, this approach will pay dividends. However, it remains to see
+how to select both the cubature set $\mathcal{S}$ and the weights $w_p$. 
 
 The original approach by An is to select a set of cubature points and corresponding weights that minimize the error of a training set. First, we describe the method of choosing weights,
 given a particular set of cubature points. To that end, suppose we have a collection of $T$ snapshots, $\ff^1, \dots, \ff^T$, and
@@ -275,6 +275,7 @@ their associated reduced-space projections $\tildef^1, \dots, \tildef^T$, where 
 following nonnegative least squares (NNLS) problem:
 
 \begin{equation}
+\label{eq:cubature}
 \begin{bmatrix}
     \tildef_{1}^1       & \cdots & \tildef_{i}^{1} & \cdots & \tildef_{n}^1\\
     \vdots                 &              & \vdots            &             & \vdots\\
@@ -296,5 +297,32 @@ following nonnegative least squares (NNLS) problem:
 	\tildef^T
 \end{bmatrix}
 \end{equation}
+with the unknown weight vector $\mathbf{w}$ satisfying $\mathbf{w} \geq \mathbf{0}$. For convenience,
+we abbreviate equation \ref{eq:cubature} as $\boldA \ww = \bb$, with $\boldA \in \R^{rT \times n}$, $\ww \in \R^n$, and $\bb \in \R^{rT}$. Each column of the matrix $\boldA$ represents subspace point-sampled versions 
+of the advection operator of the snapshot $t \in [1 \dots T]$ at the corresponding cubature point $i \in [1 \dots n]$. The vector $\ww$ represents the unknown nonnegative weights we seek. Finally, the vector $\bb$
+is a projected full-rank advection computed via equation \ref{eq:fulladvect}.
+\subsubsection{Greedy Cubature Selection}
+We see from equation \ref{eq:cubature} that given a set $\fancyS$ of cubature points, we can calculate the corresponding weights from the weight vector $\ww$. However, the question remains of how to select
+the set $\fancyS$ in the first place. Suppose for the sake of argument we have already selected a set of cubature points, giving us a preliminary set $\fancyS$, yet the residual $\rr = \bb - \boldA \ww$ has a significant
+magnitude $\left \lVert \rr \right \rVert_2 > \epsilon$ greater than a desired tolerance. To decrease the error, we must add a new cubature point to $\fancyS$, which extends the matrix $\boldA$ by appending a new column.
+This will then update the new residual and decrease the error. The ``greedy'' solution is to select a cubature point $p$ whose corresponding column $\aaa_p$ maximally projects onto the residual $\rr$; i.e., we
+wish to maximize the dot product $\aaa_p \cdot \rr$. Once such a point $p$ is found, we add it to our set $\fancyS$ and update the residual. We repeat this process until the residual has a magnitude smaller than
+the desired tolerance $\epsilon$. 
 
-with the unknown weight vector $\mathbf{w}$ satisfying $\mathbf{w} \geq \mathbf{0}$. 
+\begin{algorithm}
+\caption{Greedy Cubature Selection}
+\begin{algorithmic}[1]
+\Function{GreedyCubature}{$\boldA$, $\bb$, $\epsilon$}
+\State $\fancyS \gets \emptyset$
+\State $\rr \gets \bb$
+\While {$\left \lVert \rr \right \rVert_2 > \epsilon$}
+\State $\fancyC \gets \Call{SelectCandidatePoints}{\fancyS}$
+\State $p \gets \argmax_{p \in \fancyC} {\aaa_p \cdot \rr}$
+\State $\fancyS \gets \fancyS \cup \{p\}$
+\State $\ww \gets \Call{NNLS}{\boldA_{\fancyS},\bb}$
+\State $\rr \gets \bb - \boldA_{\fancyS} \ww$
+\EndWhile
+\Return{$(\fancyS$, $\ww$)}
+\EndFunction
+\end{algorithmic}
+\end{algorithm}

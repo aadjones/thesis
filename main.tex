@@ -17,6 +17,8 @@
   \fancyfoot[C]{\thepage}
 }
 
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
 \usepackage{scrextend}
 \usepackage{asymptote}
 \usepackage[font=rm, labelfont={rm,bf}, margin=1cm]{caption}
@@ -76,7 +78,10 @@
 \providecommand*{\vertbar}{\rule[-1ex]{0.5pt}{10.5ex}}
 
 % Aaron's math commands
+\DeclareMathOperator*{\argmax}{arg\,max}
 \newcommand{\fancyF}{\mathcal{F}}
+\newcommand{\fancyC}{\mathcal{C}}
+\newcommand{\fancyS}{\mathcal{S}}
 \newcommand{\UU}{\mathbf{U}}
 \newcommand{\VV}{\mathbf{V}}
 \newcommand{\Uhat}{\widehat{\mathbf{U}}}
@@ -93,9 +98,11 @@
 \newcommand{\xx}{\mathbf{x}}
 \newcommand{\uu}{\mathbf{u}}
 \newcommand{\dd}{\mathbf{d}}
+\newcommand{\bb}{\mathbf{b}}
 \newcommand{\kk}{\mathbf{k}}
 \newcommand{\ff}{\mathbf{f}}
 \newcommand{\vv}{\mathbf{v}}
+\newcommand{\rr}{\mathbf{r}}
 \newcommand{\bolds}{\mathbf{s}}
 \newcommand{\utilde}{\mathbf{q}}
 \newcommand{\xtilde}{\widetilde{\mathbf{x}}}
@@ -153,7 +160,7 @@
 
 % This command is great to only print out a certain chapter, keeping references etc from other chapters.
 % \includeonly{chap6/chap6, chap7/chap7}
-\includeonly{chap4/chap4}
+\includeonly{chap3/chap3}
 
 \usepackage{afterpage}
 
