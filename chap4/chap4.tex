@@ -322,7 +322,10 @@ We instead propose to automatically generate a variety of different $\QQQ$ matri
 \begin{equation}
 \QQQ(u,v,w) = (1 + u + v + w)^\gamma,
 \end{equation}
-where $\gamma$ is a parameter that is adjusted per block. Linear models are also possible, e.g.~$\QQQ(u,v,w) = \gamma\;(1 + u + v + w)$, but preliminary experiments found that this model was too simple to yield useful compressions. Analogous to the 2D case, the user specifies a quality parameter $p$. In 3D, we interpret $p$ as the percentage of the original energy\footnote{That is, $L_2$ norm.} that should be preserved. Each block then performs a bisection search over the range $\gamma \in [0, n]$, where $n = 32$ is the number of bits that were used for normalization prior to quantization. Higher values of $n$ are essentially meaningless, as they damp everything except the DC component to zero. In practice, we found that this bisection search terminates within a very small tolerance of the desired energy preservation after at most $8$ iterations.
+where $\gamma$ is a parameter that is adjusted per block. 
+%Linear models are also possible, e.g.~$\QQQ(u,v,w) = \gamma\;(1 + u + v + w)$, but preliminary experiments
+%found that this model was too simple to yield useful compressions. 
+Analogous to the 2D case, the user specifies a quality parameter $p$. In 3D, we interpret $p$ as the percentage of the original energy\footnote{That is, $L_2$ norm.} that should be preserved. Each block then performs a bisection search over the range $\gamma \in [0, n]$, where $n = 32$ is the number of bits that were used for normalization prior to quantization. Higher values of $n$ are essentially meaningless, as they damp everything except the DC component to zero. In practice, we found that this bisection search terminates within a very small tolerance of the desired energy preservation after at most $8$ iterations.
 
 This approach provides a custom quantization matrix for each block while maintaining an approximately constant energy loss per block. Important high-frequency components are preserved when they are present, while smoother, low-frequency blocks are still aggressively compressed. This block-varying value $\gamma$ must then be computed by the encoder and provided to the decoder in the encoded bytestream. For an $8 \times 8 \times 8$ block, the memory footprint of a single additional scalar $\gamma$ per block is negligible. We compare this strategy to a uniform non-adaptive quantization approach in \S\ref{sec:Results}.
 
@@ -365,7 +368,15 @@ For a $\CC$ matrix containing ${3N \times r}$ non-zero entries, after taking the
 
 We have described one possible scheme for compressing subspace fluid basis matrices. Several initially promising possibilities were also investigated, but ultimately discarded.
 
-The motivating example from \S\ref{sec:laplacian} uses mixed DST and DCT to achieve ideal compression, whereas we only use DCT. The use of DST was investigated as well, but was not found to give superior results. Unless the velocity values along a block border are all exactly zero, i.e.~the block has Dirichlet boundaries along all its walls, the DCT consistently yields superior results.
+The motivating example from \S\ref{sec:laplacian} uses mixed DST and DCT to achieve ideal compression, whereas we only use DCT. The use of DST was investigated as well, but was not found to give superior results. Unless the velocity values along a block border are all exactly zero, i.e.~the block has Dirichlet boundaries along all its walls, the DCT consistently yields superior results, as shown in Figure \ref{fig:interleaved}.
+
+\begin{figure}
+	\centering
+	\includegraphics[height=0.5\textwidth]{chap4/figures/transform_comparison.eps}
+	\caption{\em A comparison of compression results using the $8$ possible cosine/sine intereavings through each of the three spatial dimensions. `C' and `S' are abbreviations for a cosine and sine transform,
+	respectively. Wee see that the `CCC' transform yields the most compressed result with the smallest output file size.}
+	\label{fig:interleaved}
+\end{figure}
 
 The $\UU$ matrix is usually constructed using an SVD \cite{Treuille:2006:MRF,Kim2013} or an eigenanalysis \cite{deWitt:2012,Liu:2015:MVF}. Therefore, corresponding singular values or eigenvalues are usually available for each column of $\UU$. These values could be used to guide the compressor, e.g.,~by allowing columns with unimportant singular values $\sigma_i$ to be compressed more aggressively. However, we found that the relationship between $\sigma_i$ and visual quality is not straightforward. Especially during re-simulation, columns that had unimportant $\sigma_i$ during the initial analysis can obtain large coefficients in $\utilde$. In such cases, the aggressive compression can become visible.
 
@@ -385,7 +396,15 @@ Prior to compression, an additional SVD could be run on each $b \times b \times 
 
 We tested our compression scheme on several subspace fluid re-simulation scenarios generated by the open-source package Zephyr \cite{Kim2013}. The fluid simulation data were generated using a Preconditioned Conjugate Gradient (PCG) solver with a Modified Incomplete Cholesky preconditioner \cite{Bridson:2015}. The codebase was implemented in C++ and tests were run on a 12-core, 2.66 GHz Mac Pro with 96 GB RAM. For the DCT and IDCT, we used FFTW \cite{FFTW05}, and Eigen \cite{eigenweb} was used for other linear algebra operations.
 
-In all of our simulations, we set $b = 8$, so $8 \times 8 \times 8$ blocks were used. Block sizes of $b = 4$ and $b = 16$ were also tested, but we found that smaller blocks redundantly captured the same low frequency information, while larger blocks lessened the likelihood of finding smooth regions that could be compressed aggressively. 
+In all of our simulations, we set $b = 8$, so $8 \times 8 \times 8$ blocks were used. Block sizes of $b = 4$ and $b = 16$ were also tested, but we found that smaller blocks redundantly captured the same low frequency information, while larger blocks lessened the likelihood of finding smooth regions that could be compressed aggressively. Figure \ref{fig:blockcomparison} summarizes these results.
+
+\begin{figure}
+	\centering
+	\includegraphics[height=0.5\textwidth]{chap4/figures/blockSizeSparsityComparison.eps}
+	\caption{\em Sparsity comparison of using different block sizes. Using $b=8$ leads to sparser, and hence more compressible results.}
+	\label{fig:blockcomparison}
+\end{figure}
+
 \begin{table}
 \begin{center}
 \begin{tabular}{|c||c|c|c|} \hline
