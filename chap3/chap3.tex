@@ -300,14 +300,14 @@ following nonnegative least squares (NNLS) problem:
 with the unknown weight vector $\mathbf{w}$ satisfying $\mathbf{w} \geq \mathbf{0}$. For convenience,
 we abbreviate equation \ref{eq:cubature} as $\boldA \ww = \bb$, with $\boldA \in \R^{rT \times n}$, $\ww \in \R^n$, and $\bb \in \R^{rT}$. Each column of the matrix $\boldA$ represents subspace point-sampled versions 
 of the advection operator of the snapshot $t \in [1 \dots T]$ at the corresponding cubature point $i \in [1 \dots n]$. The vector $\ww$ represents the unknown nonnegative weights we seek. Finally, the vector $\bb$
-is a projected full-rank advection computed via equation \ref{eq:fulladvect}.
+is a projected full-rank advection computed via equation \ref{eq:fulladvect}. Schemes for solving the NNLS problem efficiently are well-known, including the standard Lawson-Hanson method \cite{lawson1995solving}, which has $O(rTn^3)$ complexity, and the ``fast'' nonnegative least squares method (FNNLS) introduced by Bro and de Jong \cite{bro1997fast}, which achieves a constant speedup over Lawson-Hanson. Provided that the number of cubature points $n$ remains much smaller than the full-space resolution $N$, these timings are acceptable. We review two different techniques for selecting the cubature points: {\em greedy} selection and {\em importance sampled} selection.
 \subsubsection{Greedy Cubature Selection}
 We see from equation \ref{eq:cubature} that given a set $\fancyS$ of cubature points, we can calculate the corresponding weights from the weight vector $\ww$. However, the question remains of how to select
-the set $\fancyS$ in the first place. Suppose for the sake of argument we have already selected a set of cubature points, giving us a preliminary set $\fancyS$, yet the residual $\rr = \bb - \boldA \ww$ has a significant
+the set $\fancyS$ in the first place. The technique of greedy selection was introduced by An et al.~in \cite{An:2008}. Suppose for the sake of argument we have already selected a set of cubature points, giving us a preliminary set $\fancyS$, yet the residual $\rr = \bb - \boldA \ww$ has a significant
 magnitude $\left \lVert \rr \right \rVert_2 > \epsilon$ greater than a desired tolerance. To decrease the error, we must add a new cubature point to $\fancyS$, which extends the matrix $\boldA$ by appending a new column.
 This will then update the new residual and decrease the error. The ``greedy'' solution is to select a cubature point $p$ whose corresponding column $\aaa_p$ maximally projects onto the residual $\rr$; i.e., we
 wish to maximize the dot product $\aaa_p \cdot \rr$. Once such a point $p$ is found, we add it to our set $\fancyS$ and update the residual. We repeat this process until the residual has a magnitude smaller than
-the desired tolerance $\epsilon$. 
+the desired tolerance $\epsilon$. The overall complexity of the greedy approach is $O(rTn^4)$.
 
 \begin{algorithm}
 \caption{Greedy Cubature Selection}
@@ -325,7 +325,21 @@ the desired tolerance $\epsilon$.
 \Return{$(\fancyS$, $\ww$)}
 \EndFunction
 \end{algorithmic}
+\label{alg:greedy}
 \end{algorithm}
+
+\subsubsection{Importance Samped Cubature Selection}
+The technique of importance sampled cubature selection was proposed by Kim and Delaney in \cite{Kim2013}. In the greedy algorithm, because the matrices $A_S$ between one iteration and the next differ only
+by one column, much of the work becomes redundant. Hence, instead of adding only one cubature point at a time, in the importance sampled selection strategy, we add $C$ points at each iteration. The strategy
+for selecting the $C$ points is done through importance sampling according to the following probability mass function:
+
+\begin{equation}
+\label{eq:pmf}
+	\text{PMF}(p) = R \frac{\lvert \aaa_p \cdot \rr \rvert}{\rr \cdot \rr}
+\end{equation}
+Here, $R$ denotes the number of points not yet in the cubature set. 
+
+To implement the importance sampling algorithm, we replace lines 5--7 of the Algorithm \ref{alg:greedy} with the following:
 
 \begin{algorithm}
 \caption{Importance Sampled Cubature Selection}
@@ -333,8 +347,11 @@ the desired tolerance $\epsilon$.
 \Function{ImportanceSampledCubature}{$C$}
 \While {$C$ points have not been added to $\fancyS$}
 \State {Randomly select a candidate $p \notin \fancyS$}
-\State {Add $p$ to $\fancyS$ with probability $\text{PDF}(p)$}
+\State {Add $p$ to $\fancyS$ with probability $\text{PMF}(p)$}
 \EndWhile
 \EndFunction
 \end{algorithmic}
+\label{alg:importance}
 \end{algorithm}
+
+The importance sampling algorithm has the advantage of a superior run-time complexity: asymptotically, it runs in $O(rTn^3)$ time.
