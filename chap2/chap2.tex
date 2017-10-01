@@ -13,21 +13,19 @@ sonification, which aims primarily toward conveying information clearly, and {
 \em musical sonification}, which aims primarily toward aesthetically useful 
 generation of music. There are many possible strategies for sonification, 
 including audification, parameter mapping sonification, and model-based 
-sonification. \cite{hermann2011sonification} We shall expand upon the meaning 
-of these terms in \S\cite{sec:background}.
+sonification \cite{hermann2011sonification}. We shall expand upon the meaning 
+of these terms in \S\ref{sec:background}.
 
 Generative art is sometimes thought of in very general terms. For instance, 
 Boden specifies eleven different categories of generative art: electronic 
-art, computer art, computer-assisted art digital art, generative art, computer
--generated art, evolutionary art, robot art, interactive art, computer-
-interactive art, and virtual reality art. \cite{boden2009generative}. In the 
+art, computer art, computer-assisted art digital art, generative art, computer-generated art, evolutionary art, robot art, interactive art, computer-interactive art, and virtual reality art \cite{boden2009generative}. In the 
 text, however, we prefer a more narrow definition of generative art as art 
 which has been created through the design and use of a computational system.
 
-One of the main attractions of this compositional style is the possibility of 
+As Curit Roads observes in \cite{roads2015composing}, one of the main attractions of this compositional style is the possibility of 
 novel discoveries that go beyond what the artist may otherwise have been able 
 to conceive: ``The computer can allow a composer to write music that goes 
-beyond that which she is already capable of.'' \cite{roads2015composing}
+beyond that which she is already capable of.'' 
 
 \subsection{Background}
 \label{sec:background}
@@ -37,7 +35,8 @@ tuning to Mozart's dice music. The twentieth century saw an increased
 interest in formalized mathematical systems as part of musical composition. 
 Composers and theorists such as Schillinger, Stockhausen, Xenakis, Cage, 
 Lucier, Lewin, and many others explored different systematic ways of 
-generating sonic art. In the twenty-first century, with the explosion of the 
+generating sonic art \cite{schillinger1949schillinger, stockhausen1962concept, xenakis1992formalized, cage2011silence, lucier1998origins, lewin2010generalized}.
+ In the twenty-first century, with the explosion of the 
 idea of ``big data,'' music and sound has been generated from all sorts of 
 data sets such as astronomical measurements, seismographs, web traffic, and 
 more. Gradually, an important question emerged: is the composer focused 
@@ -47,7 +46,7 @@ question touches the tip of the iceberg of many challenging philosophical
 questions, such as whether music can even have any external meaning, or the 
 distinction between the artist's intention and the listener's response. While 
 we shall only explore a few of these ideas in some detail, the interested 
-reader can find more thorough discussions in \todo{citation}.
+reader can find more thorough discussions in \cite{demers2010listening}.
 
 In the earlier forms of sonification, the data itself tended to be the most 
 prominent feature. Indeed, sonification was viewed as an offshoot of data 
@@ -69,7 +68,7 @@ perceptual limits of the link between the data and the sound, although
 formally speaking, it still is present. Kramer proposes a ``semiotic'' 
 spectrum from analogic to symbolic sonifications, with audification at the 
 extreme analogic end as closest to the data, parameter mapping in the middle, 
-and model-based techniques at the symbolic extreme.
+and model-based techniques at the symbolic extreme \cite{hermann2011sonification}.
 
 \subsection{Model-Based Sonification}
 \label{sec:modelbased}
@@ -78,7 +77,7 @@ sonification (MBS) the most closely, we review this technique in some detail.
 According to Hermann, ``Model-Based Sonification is a sonification technique 
 that takes a
 particular look at how acoustic responses are generated in response to the 
-user’s actions, and
+user's actions, and
 offers a framework to govern how these insights can be carried over to data 
 sonification. As
 a result, Model-Based Sonification demands the creation of processes that 
@@ -119,14 +118,14 @@ Hermann also identifies six key components that aid in the design of a MBS
 system: setup, model dynamics, excitation, initial state, link-variables, and 
 listener characteristics. It is also useful to keep as separate abstract 
 concepts the data space, in which the data lives; the model space, in which 
-the sonification ```laws'' live; the sound space, in which the actual sound 
+the sonification ``laws'' live; the sound space, in which the actual sound 
 itself lives; and the listener space, in which the listener's reaction to the 
 sound lives. The model setup, thus, takes data from the data space, and maps 
 it to the space of a dynamical model with time-varying components that create 
 the corresponding sound in the sound space. 
 
 As a general example, suppose that the data can be interpreted as a 
-collection of vectors $\{\xx_j\}, j=1,\dots,N$ living in the $d$-dimensional 
+collection of vectors $\{\xx_j\}, j=1,\dots,N$, living in the $d$-dimensional 
 vector space $\R^d$. (For instance, more concretely, the data might comprise 
 the temperature, barometric pressure, and humidity in Santa Barbara for each 
 day in the year 2017, meaning $d=3$ and the collection has $N=365$ elements.) 
@@ -136,8 +135,7 @@ ubiquity of mathematical tools in linear algebra that will play nicely only
 if we view our data through the lens of a vector space.
 
 Given our model setup, we next turn to the model dynamics. Since our goal is 
-to drive a sound-based model over time, it is natural to consider a time-
-varying evolution to our model. In other words, we consider the model not as 
+to drive a sound-based model over time, it is natural to consider a time-varying evolution to our model. In other words, we consider the model not as 
 a static configuration but as a dynamical system. Mathematically speaking, if 
 we write ${\bolds}(t)$ to denote the state of the model at time $t$, then we 
 would like a differential equation to govern the time evolution---e.g.,
@@ -164,13 +162,13 @@ force.
 The model setup is analogous to the initial and boundary conditions of a 
 dynamical system. For example, a typical first-order ordinary differential 
 equation $\frac{dx}{dt} = f(x(t), t)$ defines an entire family of possible 
-solutions $x$. Only by specifying an initial condition $x(0) = x_0$ do we 
+solutions $x(t)$. Only by specifying an initial condition $x(0) = x_0$ do we 
 uniquely determine which trajectory to take. More general differential 
 equations, in addition to requiring initial conditions, may also require 
 boundary conditions to determine edge behaviors. For instance, in a fluid 
 simulation, we frequently use the ``no-slip'' boundary condition, meaning 
 that at a solid boundary, the fluid has zero velocity relative to the 
-boundary. These parameters can greatly influence the resulting simulation, 
+boundary \cite{day1990no}. These parameters can greatly influence the resulting simulation, 
 but the designer typically through experience and experimentation has 
 knowledge of which conditions to use in order to obtain the desired physical 
 effect.
@@ -192,7 +190,7 @@ require at least 44100 samples to be computed per second, which may be
 computationally infeasible. Indeed, the audiovisual system proposed in this 
 dissertation cannot be run in real-time using the available computing power 
 as of writing in 2017. The tradeoffs of real-time vs. nonreal-time 
-composition will be discussed in section \todo{cite section}.
+composition will be discussed further in Chapter \ref{chap:chap6}.
 
 Listener characteristics aim to understand better the desired mode of 
 listening for which the composer aims. For example, shall the listener 
@@ -203,7 +201,7 @@ audio output. For instance, by using careful panning techniques, the composer
 can create many different desired perceptions in the listener.
 
 \subsection{Parameter Mapping Sonification}
-Parameter Mapping Sonification (PMSon) is another important technique for 
+Following Grond and Berger in \cite{hermann2011sonification}, Parameter Mapping Sonification (PMSon) is another important technique for 
 sonification. It is a step removed from the more literal form of 
 audification, in which the raw data is mapped directly into an audio-rate 
 signal. Instead, PMSon is characterized by a mapping of abstract information 
@@ -263,11 +261,11 @@ PMSon systems.
 \subsection{Synthesis Methods}
 In designing any sonification system, the craft of audio synthesis itself is 
 an important ingredient. Many different techniques exist for generating 
-digital sound. We explore just a handful of possibilities in this section.
+digital sound. We explore just a handful of possibilities in this section, following Cook in \cite{hermann2011sonification}.
 
 The technique of additive synthesis is perhaps the most basic and 
 fundamental. The general strategy is attributed to the concepts of harmonic 
-analysis. According to the theory of Fourier series, we know that any 
+analysis. According to the theory of Fourier series \cite{katznelson2004introduction}, we know that any 
 periodic signal $f(t)$ with period $L$ can be decomposed into a Fourier 
 series via the equation
 
@@ -309,7 +307,7 @@ Here, the unknown $y = y(t)$ represents displacement from the equilibrium, $m$ i
 and an overdot denotes a time derivative. The solution is given by
 
 \begin{equation}
-y(t) = y_0 e^{-\frac{ct}{2m}} \cos\left({t \sqrt{\frac{k}{m} - \left(\frac{c}{2m}\right)^2}}\right)
+y(t) = y_0 e^{-\frac{c}{2m}t} \cos\left({t \sqrt{\frac{k}{m} - \left(\frac{c}{2m}\right)^2}}\right)
 \end{equation}
 
 While these equations are a bit abstract, they apply directly to simple idealized musical instruments. For example,
@@ -320,8 +318,8 @@ more sophisticated example, the membrane of a drumhead can also be excited into 
 modal vibration shapes that correspond to its natural frequencies. These frequencies again will depend on the
 boundary condition (how the drum is pinned down) as well as the geometric shape of the drumhead. 
 
-Perry Cook presents an interesting interpretation of the dampened harmonic oscillator as a second order,
-2-pole feedback filter. If we interpret Equation \cite{eq:dampedosc} using discrete derivatives, we obtain 
+Cook presents an interesting interpretation of the dampened harmonic oscillator as a second order,
+2-pole feedback filter. If we interpret Equation \ref{eq:dampedosc} using discrete derivatives, we obtain 
 
 \begin{equation}
 \frac{y[N] - 2y[N-1] + y[N-2]}{T^2} + \frac{c}{m} \frac{y[N] - y[N-1]}{T} + \frac{k}{m} y[N] = 0
@@ -340,8 +338,8 @@ Solving for $y[N]$ in terms of the previous samples, we get
 y[N] = c_1 y[N-1] + c_2 y[N-2]
 \end{equation}
 
-where $c_1 = \frac{2m + cT}{m + cT + kT^2}$ and $c_2 = \frac{m}{m + cT + kT^2}$. In Digital
-Systems Processing (DSP), Equation \cite{eq:linsys} can be implemented using a second order 2-pole feedback filter. 
+where $c_1 = \frac{2m + cT}{m + cT + kT^2}$ and $c_2 = \frac{m}{m + cT + kT^2}$. In the Digital
+Systems Processing (DSP) literature \cite{smith1997scientist}, Equation \ref{eq:linsys} can be implemented using a second order 2-pole feedback filter. 
 Thus, we can interpret modal synthesis as a form of subtractive synthesis, in which a spectrally rich input source, such as
 noise, or an impulse, excites modal filters into resonance.
 
@@ -349,11 +347,16 @@ noise, or an impulse, excites modal filters into resonance.
 A continual dilemma in generative art is the conflict between the level of 
 rigor of the underlying formal system and the human perception of its output. 
 Some artists (e.g. Milton Babbitt) take the dogmatic position that the logic 
-of the system trumps the general perception of the output. \cite{babbitt1958cares}  
+of the system trumps the general perception of the output \cite{babbitt1958cares}.
 However, others such as K{\v{r}}enek have taken a more careful middle 
-ground, arguing that the existence of an aesthetically coherent system of 
+ground, arguing in \cite{kvrenek1939music} that the existence of an aesthetically coherent system of 
 rules is no guarantee that an aesthetically coherent artistic result will 
-perceptibly emerge: ``We cannot take the bare logical coherence of a musical `
-axiomatic' system as the sole criterion of its soundness! \dots The 
+perceptibly emerge: ``We cannot take the bare logical coherence of a musical `axiomatic' system as the sole criterion of its soundness! \dots The 
 outstanding characteristic of music [is] its independence from the linguistic 
-limitations of general logic.'' \cite{kvrenek1939music}
+limitations of general logic.'' In this dissertation, our attitude aligns more closely to K{\v{r}}enek than to Babbitt. While the rigor of the underlying system
+is an important concern, the sonic output still must be considered carefully and adjusted as necessary. To that end, our freedom of choice in the sonification
+strategy allows us to make choices that emphasize musical qualities such as texture, timbre, and dynamic control while still adhering to the logic of the system. We view
+our system as a high-level tool through which novel sounds and visuals can be generated automatically, evolving together over time. Aesthetically, the visual and sonic
+impression on the viewer/listener is an important criterion which cannot be ignored by appealing to the logic of the system. As a basic example of applying that principle in our work, we selected a
+ visually interesting training set of fluid motions so that the subspace dynamics retained a variety of pleasing forms and shapes. A more in-depth discussion of our aesthetic principles as applied
+ to our audiovisual system follows in Chapter \ref{chap:chap6}.
