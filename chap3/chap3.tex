@@ -2,7 +2,7 @@
 \label{chap:chap3}
 \section{Fluids}
 
-A {\em fluid}, formally speaking, is a substance that continuously deforms under the application of shear stress \cite{batchelor2000introduction}. More intuitively, it is a substance that {\em flows}. Although colloquially we may use the term fluid to refer only to liquids, gases can exhibit flow, and are therefore considered to be fluids as well. (Indeed, the results demonstrated in this dissertation focus entirely on the turbulent flow of smoke.) The natural world is full of captivating fluid motions: ocean waves, ripples in a pond, clouds, the steam of a teakettle, etc. These flowing patterns, while beautiful, appear difficult to formalize precisely, and the modeling of fluids continues to be a mathematical and computational challenge to this day.
+A {\em fluid} is a substance that continuously deforms under the application of shear stress \cite{batchelor2000introduction}. More intuitively, it is a substance that {\em flows}. Although colloquially we may use the term fluid to refer only to liquids, gases can exhibit flow, and are therefore considered to be fluids as well. (Indeed, the results demonstrated in this dissertation focus entirely on the turbulent flow of smoke.) The natural world is full of captivating fluid motions: ocean waves, ripples in a pond, clouds, the steam of a teakettle, etc. These flowing patterns, while beautiful, appear difficult to formalize precisely, and the modeling of fluids continues to be a mathematical and computational challenge to this day.
 
 \section{Physics-based modeling}
 The field of {\em fluid dynamics} in physics seeks to model and describe fluid flow systematically according to equations generated from a set of basic assumptions and principles. In order for continuous mathematical operators to be used to describe fluids, one of the basic assumptions is that of the {\em continuum}: for mathematical purposes, we assume that fluid velocity varies continuously across space, even though in reality, fluids are actually composed of discrete molecules. Besides this continuum assumption, the various conservation laws of mass, energy, and momentum, imply the famous Navier-Stokes equations \cite{currie2012fundamental}, which describe the velocity field $\uu$ of fluid flow depending on the intrinsic stress of viscosity and pressure. In the case where we make the additional simplifying assumption that the fluid is incompressible,\footnote{i.e., the fluid density does not vary within the flow field} the equations take the following form:
@@ -16,10 +16,10 @@ The field of {\em fluid dynamics} in physics seeks to model and describe fluid f
 \frac{\partial \uu}{\partial t} = -\left(\uu \cdot \nabla \right)\uu + \nu \nabla^{2}\uu - \nabla{p} + \mathbf{f}_e
 \end{equation}
 
-There are several terms here that must be unpacked:
+The incompressibility assumption is violated for fluid dynamics such as supersonic flows; however, these types of motions are not the dynamics we seek to model in this dissertation. There are several terms here that must be unpacked:
 
 \begin{itemize}
-\item The time-varying vector field $\uu = u(\xx, t)$ describes the fluid velocity field. It is the main quantity we are interested in, and solving these differential equations amounts to figuring out what $\uu$ is for all times $t$.
+\item The time-varying vector field $\uu = u(\xx, t)$ describes the fluid velocity field. It is the main quantity we are interested in, and solving these differential equations amounts to describing what $\uu$ is for all times $t$.
 \item The constant $\nu$ represents the viscosity of the fluid, which represents its resistance to deform while flowing. (Intuitively, this can be thought of its resistance to being stirred: molasses, for instance, has higher viscosity than water.) 
 \item The time-varying scalar field $p = p(\xx, t)\ $ represents the pressure field of the fluid. 
 \item The time-varying vector field $\mathbf{f}_e = \mathbf{f}_e(\xx, t)$ represents any external forces affecting the fluid, such as gravity.
@@ -30,7 +30,7 @@ Equation \ref{eq:incompress} enforces the assumption of incompressibility, while
 
 Simulation is the imitation of a natural process, in this case over time. Any simulation must first determine a technique of modeling the process computationally, and there are often many different possible strategies. We consider here a few typical approaches in computational fluid dynamics.
 
-One of the most direct ways of modeling fluids is to discretize both the spatial and time domain. In other words, to perform the calculations, we dice up the region of space into a regular grid of small cubical cells. Each cell then contains a vector, or arrow, describing the velocity of the fluid at the position in space. In order to evolve the motion of the flow over time, we also dice up time itself into a sequence of discrete time steps, computing how the velocity of the fluid in each cell changes at each time step. This approach is called the {\em Eulerian} viewpoint of the flow. Intuitively, this can be thought of as staying in a fixed location and observing the flow through that particular location. More precisely, the fluid's velocity in this viewpoint is represented as $\uu(\xx, t)$, which gives the velocity of the fluid at each spatial location $\xx$ and time $t$.
+As in all numerical techniques of modeling fluids, we first discretize both the spatial and time domain. In other words, to perform the calculations, we dice up the region of space into a regular grid of small cubical cells. Each cell then contains a vector, or arrow, describing the velocity of the fluid at the position in space. In order to evolve the motion of the flow over time, we also dice up time itself into a sequence of discrete time steps, computing how the velocity of the fluid in each cell changes at each time step. This approach is called the {\em Eulerian} viewpoint of the flow. Intuitively, this can be thought of as staying in a fixed location and observing the flow through that particular location. More precisely, the fluid's velocity in this viewpoint is represented as $\uu(\xx, t)$, which gives the velocity of the fluid at each spatial location $\xx$ and time $t$.
 
 In contrast, the {\em Lagrangian} viewpoint of the flow takes the point of view of each individual fluid particle as it moves along the flow through space and time. Intuitively, this can be thought of drifting along with the flow. If we label each particle based on its position in space using a vector field $\mathbf{r}$, we then describe the fluid flow with the position field $\mathbf{X}(\mathbf{r}, t)$ , which gives the position of each particle labeled by $\mathbf{r}$ at time $t$.
 
@@ -58,7 +58,7 @@ which is often called the {\em material derivative}. The operator $\uu \cdot \na
 \subsection{Numerical Simulation}
 Numerical simulation brings the abstract equations of mathematical simulation to a concrete, computational implementation. Typically, this involves discretization of any continuous parameters in the model, such as time and 
 space. As such, idealized concepts such as spatial and time-dependent derivatives must be approximated. Numerical analysis is a broad and rich field in applied mathematics and engineering, and many different approaches
-are available, each with various pluses and minuses. For the scope of this dissertation, we consider the numerical method of Jos Stam's {\em Stable Fluids} \cite{Stam99}, which is the backbone of our full-space fluid simulation technique. 
+are available, each with various pluses and minuses. For the scope of this dissertation, we consider the numerical method of Jos Stam's {\em Stable Fluids} \cite{Stam99}, which is the backbone of our fluid simulation technique. 
 
 The first step in Stam's method, following the technique of Chorin and Marsden in \cite{chorin1990mathematical}, is to devise a technique to combine the two equations \ref{eq:incompress} and \ref{eq:momentum} into one equation. We rely on a result from vector calculus called the Helmholtz-Hodge decomposition, which states that any arbitrary vector field $\ww$ can be decomposed uniquely into the sum of a divergence-free, or solenoidal, vector field and a curl-free, or irrotational, vector field. More precisely,
 we can write
@@ -93,8 +93,10 @@ hand-side of \ref{eq:stamns} can be regarded as a combination of several terms (
 
 The external forces can be approximated simply using forward Euler or other explicit schemes. In other words, we can write
 $\ww_1(\xx) = \ww_0(\xx) + \Delta t \mathbf{f}_{\text{ext}}(\xx, t)$. The advection term, however, is nonlinear and adds considerable complexity to the solution. Stam's insight was to consider the advection from a Lagrangian viewpoint. Intuitively speaking, each fluid particle is advected by its own velocity. Hence, to calculate the velocity at a particular spatial point $\xx$ at the next time step $t + \Delta t$, we backtrace from the point $\xx$ through the previous velocity field over a time step of $\Delta t$. Letting $\xx$ vary, following Stam's notation, this defines a path $\mathbf{p}(\xx, s)$ along a partial streamline of the velocity field. We assume then that the new velocity at the point $\xx$ at time $t + \Delta t$ must therefore be the same as the old velocity at the backtraced point at time $\Delta t$ previous. (Although the backtraced point may not lie exactly on a grid cell, we can use linear interpolation to reslve this problem.) More concretely, we have $\ww_2(\xx) = \text{Interpolate}\left(\ww_1\left(\mathbf{p}(\xx, -\Delta t)\right)\right)$.
+Because this approach exploit both the Eulerian and Lagrangian viewpoints, it is known as a {\em semi-Lagrangian} strategy.
 
-One of the key advantages to Stam's advection technique is that it is {\em unconditionally stable}: in other words, no matter how large a time step $\Delta t$ we select, the velocity will remain bounded. Intuitively, this is straightforward to observe: each velocity update is the result of an interpolation of previous velocity values, and therefore cannot be any greater than any of the previous values. From a practical standpoint, this numerical stability is a big plus; however, with very large time steps, the problem of numerical dissipation becomes more of an issue. A more detailed discussion of these issues can be found in \cite{bridson2015fluid}.
+One of the key advantages to semi-Lagrangian advection technique is that it is {\em unconditionally stable}: in other words, no matter how large a time step $\Delta t$ we select, the velocity will remain bounded. Intuitively, this is straightforward to observe: each velocity update is the result of an interpolation of previous velocity values, and therefore cannot be any greater than any of the previous values. From a practical standpoint, this numerical stability is a big plus, and the heart of Stam's argument as to
+why this method is useful in computer graphics. However, with very large time steps, the problem of numerical dissipation becomes more of an issue. A more detailed discussion of these issues can be found in \cite{bridson2015fluid}.
 
 The remaining terms in the splitting are the diffusion and pressure projection. The diffusion term is simply the heat equation, relying on the Laplace operator:
 
@@ -112,7 +114,7 @@ Finally, as observed previously, the pressure projection reduces to a Poisson eq
 
 From here, we can recover $\ww_4$ via the equation $\ww_4 = \ww_3 - \nabla q$. Hence, the numerical splitting is complete.
 
-Within Stam's paper is another interesting topic of carrying out the equations of motion within the Fourier domian. Although 
+Within Stam's paper is another interesting topic of carrying out the equations of motion within the Fourier domian, explored further in \cite{stam2001simple}. Although 
 we do not implement our solver using this technique, it is a topic of interest based on our compression technique as well as,
 our frequency-domain interpretation of the fluid modes and our corresponding sonification technique later on, so we delve into a few details here. The key observation is that the Fourier transform diagonalizes spatial derivatives. In other words, if we denote the Fourier transform of $\uu(\xx)$ by $\fancyF[\uu(\xx)](\kk) = \uhat(\kk)$, then we have $\fancyF[\nabla \uu(\xx)](\kk) = i \kk \uhat(\kk)$. The divergence operator similarly satisfies $\fancyF[\nabla \cdot \uu(\xx)](\kk) = i \kk \cdot \uhat(\kk)$, and the Laplacian, being the divergence of the gradient, satisfies $\fancyF[\nabla^2 \uu(\xx)](\kk) = - k^2 \uhat(\kk)$, where $k = |\kk|$. The upshot of all this is that we can view some of the fluid operators in the spatial domain in simple ways in the frequency domain. For example, the diffusion, based on the Laplacian operator, can be thought of as a low-pass filter with decay governed by the viscosity. In general, this mode of
 thinking bears fruit later for our discussions of the compression algorithm in Chapter \ref{chap:chap4} and our sonification system in Chapter \ref{chap:chap5}.
@@ -122,7 +124,7 @@ Subspace methods, also known as model reduction, or reduced order methods, has a
 
 \subsection{Modal Analysis}
 \label{sec:modal}
-To see an example of the subspace method in action, consider the modeling of small deformations of rigid bodies. Although rigid bodies in principle have many degrees of freedom over which they can deform, they have certain characteristic shapes into which they are more likely to deform. These shapes, also known as {\em modes}, are the ones which minimize the strain, and in an intuitive sense are the ``natural'' deformations of the rigid body. To compute these, we assume the rigid body is discretized into a mesh with $N$ vertices. We then compute the system mass and stiffness matrices $\MM \in \R^{3N \times 3N}$ and $\KK \in \R^{3N \times 3N}$, respectively. The modes then satisfy the generalized eigenvalue equation
+Following Barbi{\v{c} and James \cite{barbivc2005real}, to see an example of the subspace method in action, consider the modeling of small deformations of rigid bodies. Although rigid bodies in principle have many degrees of freedom over which they can deform, they have certain characteristic shapes into which they are more likely to deform. These shapes, also known as {\em modes}, are the ones which minimize the strain, and in an intuitive sense are the ``natural'' deformations of the rigid body. To compute these, we assume the rigid body is discretized into a mesh with $N$ vertices. We then compute the system mass and stiffness matrices $\MM \in \R^{3N \times 3N}$ and $\KK \in \R^{3N \times 3N}$, respectively. The modes then satisfy the generalized eigenvalue equation
 
 \begin{equation}
 	\KK \xx = \lambda \MM \xx
@@ -131,7 +133,7 @@ To see an example of the subspace method in action, consider the modeling of sma
 Due to the special properties of the matrices $\MM$ and $\KK$, which are both symmetric positive-definite (SPD), the eigenvalues $\lambda_i$ are positive real numbers. 
 Although there are $3N$ eigenvalues in total, in practice, we can take a subset of them, $\lambda_1, \lambda_2, \dots, \lambda_r$, from least to greatest, and their associated eigenvectors
  $\psi_1, \psi_2, \dots, \psi_r$. (Here, $r \ll 3N$ represents the number of modes we wish to retain.) The eigenvectors $\psi_i$ we choose corresponding to the eigenvalues $\lambda_i$ 
- are not unique; for convenience, we select those that satisfy the mass-orthogonality condition $\langle \MM \psi_i, \psi_j \rangle = \delta_{ij}$, where $\delta_{ij}$ is the Kronekcer delta, 
+ are not unique; for convenience, we select those that satisfy the mass-orthogonality condition $\langle \MM \psi_i, \psi_j \rangle = \delta_{ij}$, where $\delta_{ij}$ is the Kronecker delta, 
  equaling $0$ for $i \neq j$ and $1$ for $i=j$. The $r$-dimensional subspace $S \subset \R^{3N}$ formed by the linear span of these eigenvectors can be encapsulated in matrix form 
  by assembling the modal basis matrix $\UU \in \R^{3N \times r}$ as follows:
 
@@ -180,7 +182,7 @@ By the mass-orthogonality condition, the term $\UU^{T} \MM \UU$ reduces to $\II_
 In this particular case, the system is uncoupled since $\Lambda$ is diagonal, so we have a collection of $r$ independent one-dimensional ordinary differential equations. These can be integrated forward in time very efficiently, obtaining $\qq_{t+1}$, the value of $\qq$ at the next time step. To finish the computation, we reconstruct into the full-dimensional space by computing $\xx_{t+1} = \UU \qq_{t+1}$.
 
 \subsection{Sound generation}
-Small rigid deformations of a solid body are precisely those that generate sound waves, so we briefly consider the application to audio of the previous discussion. Recall that our subspace reduction produces a collection of $r$ independent one-dimensional equations, which, expanded out, take the form
+Small rigid deformations of a solid body are precisely those that generate sound waves. Hence, following O'Brien \cite{O'Brien:2001:SSP:945191.945250}, we briefly consider the application to audio of the previous discussion. Recall that our subspace reduction produces a collection of $r$ independent one-dimensional equations, which, expanded out, take the form
 
 \begin{equation}
 \label{eq:system}
@@ -194,7 +196,8 @@ our sonification process in Chapter \ref{chap:chap5}.
 We have seen how subspace methods apply to rigid deformations, which can be characterized by linear systems. However, more general and complex phenomena, including fluid flow, require non-linear characterizations. Hence, we consider a more general framework for applying subspace methods, following Treuille 
 \cite{Treuille:2006:MRF}.
 
-In the most abstract setting, the subspace technique takes a vector $\uu \in \R^N$ living in a high-dimensional space and maps it to a corresponding reduced-space vector $\qq \in \R^r$, with $r \ll N$. This mapping can be seen as a projection operator $P : \R^N \rightarrow \R^r$, which carries $\uu$ to $\qq$, and its corresponding reconstruction operator $P^{-1} : \R^r \rightarrow \R^N$, which lifts $\qq$ back up to $\uu$. (Note that since $r < N$, the projection map $P$ is not one-to-one, and hence necessarily must lose some information.) 
+In the most abstract setting, the subspace technique takes a vector $\uu \in \R^N$ living in a high-dimensional space and maps it to a corresponding reduced-space vector $\qq \in \R^r$, with $r \ll N$. (We refer to this high-dimensional space
+as the ``full space'' and the reduced space as the ``subspace.'') This mapping can be seen as a projection operator $P : \R^N \rightarrow \R^r$, which carries $\uu$ to $\qq$, and its corresponding reconstruction operator $P^{-1} : \R^r \rightarrow \R^N$, which lifts $\qq$ back up to $\uu$. (Note that since $r < N$, the projection map $P$ is not one-to-one, and hence necessarily must lose some information.) 
 
 Within physical simulations, we are not concerned just with the projection mapping of one vector in the high space down to its corresponding reduced vector, but also a framework for time evolution. In other words, given a differential equation in the full space
 
@@ -223,10 +226,10 @@ advection, diffusion, and projection. While most of these operations can be view
 term, being nonlinear, requires a more careful approach. Although in principle, by discretizing the advection operator, a matrix corresponding
 to the advection term could be formulated, this matrix will depend on the current timestep, and thus cannot be precomputed like the others. To combat this issue,
 the original approach of Treuille is to construct a static third order tensor, which can be precomputed. However, as Kim and Delaney point out, this technique
-will not in general be a {\em consistent} integration method \cite{Kim2013, Carlberg11}. The intuition for this problem is that the finite difference methods in the reduced space do not play nicely with the semi-Lagrangian methods in the full-space, but further details are beyond the scope of this dissertation. However, the need for a different strategy for advection and other nonlinear phenomena motivates the notion of cubature schemes, described next.
+will not in general be a {\em consistent} integration method \cite{Kim2013, Carlberg11}. The intuition for this problem is that the finite difference methods in the reduced space are not equivalent to the semi-Lagrangian methods in the full-space, but further details are beyond the scope of this dissertation. However, the need for a different strategy for advection and other nonlinear phenomena motivates the notion of cubature schemes, described next.
 
 \subsection{Cubature schemes}
-The work of An et al. \cite{An:2008} brought the idea of cubature methods to nonlinear solid mechanics. The term cubature itself is a multidimensional analogue
+The work of An et al. \cite{An:2008} brought the idea of cubature methods to nonlinear solid mechanics in computer graphics. The term cubature itself is a multidimensional analogue
 of the classical one-dimensional problem of {\em quadrature}, which seeks to approximate the definite integral of a function by estimating it as a weighted 
 sum of point-sampled versions of the function. More concretely, we have an approximation of the form
 
@@ -354,4 +357,5 @@ To implement the importance sampling algorithm, we replace lines 5--7 of the Alg
 \label{alg:importance}
 \end{algorithm}
 
-The importance sampling algorithm has the advantage of a superior run-time complexity: asymptotically, it runs in $O(rTn^3)$ time.
+The importance sampling algorithm has the advantage of a superior run-time complexity: asymptotically, it runs in $O(rTn^3)$ time. Other approaches such as nonnegative hard thresholding pursuit (NN-HTP) \cite{von2013efficient}
+and alternating direction method of multipliers (ADMM) \cite{pan2015subspace} have been explored as well, but they are outside the scope of this dissertation.
