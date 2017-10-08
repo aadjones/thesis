@@ -22,7 +22,7 @@ art, computer art, computer-assisted art digital art, generative art, computer-g
 text, however, we prefer a more narrow definition of generative art as art 
 which has been created through the design and use of a computational system.
 
-As Curit Roads observes in \cite{roads2015composing}, one of the main attractions of this compositional style is the possibility of 
+As Curtis Roads observes in \cite{roads2015composing}, one of the main attractions of this compositional style is the possibility of 
 novel discoveries that go beyond what the artist may otherwise have been able 
 to conceive: ``The computer can allow a composer to write music that goes 
 beyond that which she is already capable of.'' 
@@ -117,9 +117,9 @@ by which objects interact with one another in space and time.
 Hermann also identifies six key components that aid in the design of a MBS 
 system: setup, model dynamics, excitation, initial state, link-variables, and 
 listener characteristics. It is also useful to keep as separate abstract 
-concepts the data space, in which the data lives; the model space, in which 
-the sonification ``laws'' live; the sound space, in which the actual sound 
-itself lives; and the listener space, in which the listener's reaction to the 
+concepts the data space in which the data lives, the model space in which 
+the sonification ``laws'' live, the sound space in which the actual sound 
+itself lives, and the listener space in which the listener's reaction to the 
 sound lives. The model setup, thus, takes data from the data space, and maps 
 it to the space of a dynamical model with time-varying components that create 
 the corresponding sound in the sound space. 
@@ -131,8 +131,7 @@ the temperature, barometric pressure, and humidity in Santa Barbara for each
 day in the year 2017, meaning $d=3$ and the collection has $N=365$ elements.) 
 Such a re-interpretation of the data abstractly in a mathematical space is 
 the primary goal of the model setup. The advantage of such an approach is the 
-ubiquity of mathematical tools in linear algebra that will play nicely only 
-if we view our data through the lens of a vector space.
+ubiquity of mathematical tools in linear algebra at our disposal if we view our data through the lens of a vector space.
 
 Given our model setup, we next turn to the model dynamics. Since our goal is 
 to drive a sound-based model over time, it is natural to consider a time-varying evolution to our model. In other words, we consider the model not as 
@@ -230,7 +229,7 @@ which to choose: pitch, timbre, rhythm, texture, envelope, duration, etc.
 As a mathematical formalism for speaking in general terms about PMSon, 
 consider a $d$-dimensional data set $\{\xx_1, \dots, \xx_N\}, \xx_j \in \R^d$
 . Let the sound parameter space have $n$ dimensions, so it is identified with 
-$R^n$. (It needn't be the case that $d = n$ in general, hence the use of 
+$\R^n$. (It needn't be the case that $d = n$ in general, hence the use of 
 multiple variables.) Next, define $g \colon \R^d \rightarrow \R^n$ to be the 
 parameter mapping function that maps an element in the data space to an 
 element in the $m$-dimensional sound parameter space.  Finally, define $f 
@@ -272,7 +271,7 @@ periodic signal $f(t)$ with period $L$ can be decomposed into a Fourier
 series via the equation
 
 \begin{equation}
-f(t) = \sum_{n \in \mathbb{Z}} c_n e^{int \frac{2\pi}{L}}
+f(t) = \sum_{n \in \mathbb{Z}} c_n e^{i\frac{2\pi}{L}nt}
 \end{equation}
 
 If we write $\omega_0$ as the frequency $\frac{2\pi}{L}$, then we see that $f$
@@ -321,7 +320,7 @@ modal vibration shapes that correspond to its natural frequencies. These frequen
 boundary condition (how the drum is pinned down) as well as the geometric shape of the drumhead. 
 
 Cook presents an interesting interpretation of the dampened harmonic oscillator as a second order,
-2-pole feedback filter. If we interpret Equation \ref{eq:dampedosc} using discrete derivatives, we obtain 
+2-pole feedback filter. If we interpret Equation \ref{eq:dampedosc} using finite-difference approximations for the derivatives, we obtain 
 
 \begin{equation}
 \frac{y[N] - 2y[N-1] + y[N-2]}{T^2} + \frac{c}{m} \frac{y[N] - y[N-1]}{T} + \frac{k}{m} y[N] = 0
