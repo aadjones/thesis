@@ -5,6 +5,7 @@
 A {\em fluid} is a substance that continuously deforms under the application of shear stress \cite{batchelor2000introduction}. More intuitively, it is a substance that {\em flows}. Although colloquially we may use the term fluid to refer only to liquids, gases can exhibit flow, and are therefore considered to be fluids as well. (Indeed, the results demonstrated in this dissertation focus entirely on the turbulent flow of smoke.) The natural world is full of captivating fluid motions: ocean waves, ripples in a pond, clouds, the steam of a teakettle, etc. These flowing patterns, while beautiful, appear difficult to formalize precisely, and the modeling of fluids continues to be a mathematical and computational challenge to this day.
 
 \section{Physics-based modeling}
+\label{sec:physics-based}
 The field of {\em fluid dynamics} in physics seeks to model and describe fluid flow systematically according to equations generated from a set of basic assumptions and principles. In order for continuous mathematical operators to be used to describe fluids, one of the basic assumptions is that of the {\em continuum}: for mathematical purposes, we assume that fluid velocity varies continuously across space, even though in reality, fluids are actually composed of discrete molecules. Besides this continuum assumption, the various conservation laws of mass, energy, and momentum, imply the famous Navier-Stokes equations \cite{currie2012fundamental}, which describe the velocity field $\uu$ of fluid flow depending on the intrinsic stress of viscosity and pressure. In the case where we make the additional simplifying assumption that the fluid is incompressible,\footnote{i.e., the fluid density does not vary within the flow field} the equations take the following form:
 
 \begin{equation}
@@ -120,6 +121,7 @@ our frequency-domain interpretation of the fluid modes and our corresponding son
 thinking bears fruit later for our discussions of the compression algorithm in Chapter \ref{chap:chap4} and our sonification system in Chapter \ref{chap:chap5}.
 
 \section{Subspace Methods}
+\label{sec:subspace}
 Subspace methods, also known as model reduction, or reduced order methods, has a long history in engineering and applied mathematics, including applications to fluid simulation \cite{lumley1967}, and was introduced to the computer graphics literature in 1989 by Pentland and Williams \cite{Pentland:1989:GVM, Berkooz93theproper}. The basic principle of these methods, as the name suggests, is to reduce the computational complexity of a large numerical simulation. A typical simulation will have many degrees of freedom in principle, generating a vast state space of possibilities. However, in practice, not all of these degrees of freedom are of equal importance. By systematically discovering a reduced subspace of the state space, and carrying out calculations within this subspace, a subspace simulation can lead to large computational accelerations with minimal degradation of accuracy.
 
 \subsection{Modal Analysis}
@@ -193,6 +195,7 @@ Recalling that each $\lambda_i$ is a positive real number, let $\omega_i$ be the
 our sonification process in Chapter \ref{chap:chap5}.
 
 \subsection{A more general subspace formulation}
+\label{sec:general-subspace}
 We have seen how subspace methods apply to rigid deformations, which can be characterized by linear systems. However, more general and complex phenomena, including fluid flow, require non-linear characterizations. Hence, we consider a more general framework for applying subspace methods, following Treuille 
 \cite{Treuille:2006:MRF}.
 
