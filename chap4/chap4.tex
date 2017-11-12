@@ -138,7 +138,7 @@ Being unitary means that $\fancyF_{\textrm{unitary}}$ preserves inner products. 
 \end{equation}
 We shall exploit this property later on in \S\ref{sec:decompress}.
 
-The asymptotic run-time of the DFT of a vector $\xx \in \C^N$, if implemented as a matrix-vector multiply, would be $O(N^2)$, as we must compute $N$ multiply-adds for each of the $N$ columns. However, the well-known fast Fourier transform (FFT) algorithm, by recursively expressing the $N$-point DFT in terms of smaller $N/2$-point DFTs, is able to compute the same result in $O(N \log{N})$ time, making it much more practical for large inputs.~\cite{1965-cooley}
+The asymptotic run-time of the DFT of a vector $\xx \in \C^N$, if implemented as a matrix-vector multiply, would be $O(N^2)$, as we must compute $N$ multiply-adds for each of the $N$ columns. However, the well-known fast Fourier transform (FFT) algorithm, by recursively expressing the $N$-point DFT in terms of smaller $N/2$-point DFTs, is able to compute the same result in $O(N \log{N})$ time, making it much more practical for large inputs \cite{1965-cooley}.
 
 The multidimensional DFT applies takes multidimensional arrays of inputs rather than vectors. For example, the two-dimensional DFT of the array $\xx \in \C^{M \times N}$ is given by
 the array $\XX \in \C^{M \times N}$ whose entries are
